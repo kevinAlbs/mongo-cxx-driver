@@ -41,7 +41,7 @@ TEST_CASE("a bulk_write will setup a mongoc bulk operation", "[bulk_write]") {
     });
 
     SECTION("with an ordered bulk write") {
-        { bulk_write bw; }
+        { bulk_write bw(bulk_write::deprecated_tag{}); }
         REQUIRE(construct_called);
         REQUIRE(ordered_value);
     }
@@ -49,7 +49,7 @@ TEST_CASE("a bulk_write will setup a mongoc bulk operation", "[bulk_write]") {
     SECTION("with an unordered bulk write") {
         options::bulk_write bw_opts;
         bw_opts.ordered(false);
-        { bulk_write bw(bw_opts); }
+        { bulk_write bw(bulk_write::deprecated_tag{}, bw_opts); }
         REQUIRE(construct_called);
         REQUIRE(!ordered_value);
     }
@@ -62,7 +62,7 @@ TEST_CASE("destruction of a bulk_write will destroy mongoc operation", "[bulk_wr
 
     destruct->visit([&destruct_called](mongoc_bulk_operation_t*) { destruct_called = true; });
 
-    { bulk_write bw; }
+    { bulk_write bw(bulk_write::deprecated_tag{}); }
     REQUIRE(destruct_called);
 }
 class insert_functor {
@@ -168,7 +168,7 @@ class delete_functor {
 TEST_CASE("passing write operations to append calls corresponding C function", "[bulk_write]") {
     instance::current();
 
-    bulk_write bw;
+    bulk_write bw(bulk_write::deprecated_tag{});
     bsoncxx::builder::basic::document filter_builder, doc_builder, update_doc_builder,
         collation_builder;
     filter_builder.append(kvp("_id", 1));

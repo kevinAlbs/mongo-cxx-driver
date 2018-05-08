@@ -41,6 +41,7 @@ class collection;
 ///
 class MONGOCXX_API bulk_write {
    public:
+    struct deprecated_tag {};
     ///
     /// Initializes a new bulk operation to be executed against a mongocxx::collection.
     ///
@@ -52,7 +53,8 @@ class MONGOCXX_API bulk_write {
     ///   collection, database, or client. mongocxx::collection::create_bulk_operation should be
     ///   used instead.
     ///
-    explicit bulk_write(options::bulk_write options = {});
+    MONGOCXX_DEPRECATED explicit bulk_write(options::bulk_write options = {});
+    explicit bulk_write(deprecated_tag, options::bulk_write options = {});
 
     ///
     /// Move constructs a bulk write operation.
