@@ -50,7 +50,7 @@ class MONGOCXX_API bulk_write {
     ///
     /// @deprecated
     ///   Bulk writes created with this constructor will not inherit write concerns from the
-    ///   collection, database, or client. mongocxx::collection::create_bulk_operation should be
+    ///   collection, database, or client. mongocxx::collection::create_bulk_write should be
     ///   used instead.
     ///
     MONGOCXX_DEPRECATED explicit bulk_write(options::bulk_write options = {});
