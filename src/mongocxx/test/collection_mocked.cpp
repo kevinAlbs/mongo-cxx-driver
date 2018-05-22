@@ -774,4 +774,15 @@ TEST_CASE("Collection", "[collection]") {
         REQUIRE(bulk_operation_destroy_called);
     }
 }
+
+TEST_CASE ("test", "[tag]") {
+    MOCK_CLIENT;
+    bool called = false;
+    client_new->interpose([&called](const mongoc_uri_t* uri){
+        called = true;
+        return (mongoc_client_t*)NULL;
+    });
+    mongocxx::client client{mongocxx::uri{}};
+    REQUIRE (called);
+}
 }  // namespace

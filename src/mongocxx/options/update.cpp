@@ -15,6 +15,8 @@
 #include <mongocxx/options/update.hpp>
 
 #include <mongocxx/config/private/prelude.hh>
+#include <bsoncxx/document/view_or_value.hpp>
+#include <bsoncxx/array/view_or_value.hpp>
 
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
@@ -54,6 +56,15 @@ const stdx::optional<bool>& update::upsert() const {
 
 const stdx::optional<class write_concern>& update::write_concern() const {
     return _write_concern;
+}
+
+update& update::array_filters(bsoncxx::array::view_or_value array_filters) {
+    *_array_filters = std::move (array_filters);
+    return *this;
+}
+
+const stdx::optional<bsoncxx::array::view_or_value>& update::array_filters () const {
+    return _array_filters;
 }
 
 bool MONGOCXX_CALL operator==(const update& lhs, const update& rhs) {

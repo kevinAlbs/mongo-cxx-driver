@@ -18,6 +18,7 @@
 #include <bsoncxx/test_util/catch.hh>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/model/update_one.hpp>
+#include <bsoncxx/builder/basic/array.hpp>
 
 namespace {
 using namespace bsoncxx::builder::basic;
@@ -28,6 +29,7 @@ TEST_CASE("update_one model tests", "[update_one][model]") {
     auto filter = make_document(kvp("a", 1));
     auto update = make_document(kvp("$set", make_document(kvp("b", 1))));
     auto collation = make_document(kvp("locale", "en_US"));
+    auto array_filters = make_array("a", "b");
 
     mongocxx::model::update_one uo(filter.view(), update.view());
 
@@ -38,5 +40,6 @@ TEST_CASE("update_one model tests", "[update_one][model]") {
 
     CHECK_OPTIONAL_ARGUMENT(uo, upsert, true);
     CHECK_OPTIONAL_ARGUMENT(uo, collation, collation.view());
+    CHECK_OPTIONAL_ARGUMENT(uo, array_filters, array_filters.view());
 }
 }  // namespace
