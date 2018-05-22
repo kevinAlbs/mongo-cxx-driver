@@ -340,6 +340,10 @@ document::value run_find_one_and_update_test(collection* coll, document::view op
         options.projection(arguments["projection"].get_document().value);
     }
 
+    if (arguments["arrayFilters"]) {
+        options.array_filters(arguments["arrayFilters"].get_array().value);
+    }
+
     if (arguments["returnDocument"]) {
         std::string return_document =
             bsoncxx::string::to_string(arguments["returnDocument"].get_utf8().value);
@@ -496,6 +500,10 @@ document::value run_update_many_test(collection* coll, document::view operation)
         options.upsert(arguments["upsert"].get_bool().value);
     }
 
+    if (arguments["arrayFilters"]) {
+        options.array_filters(arguments["arrayFilters"].get_array().value);
+    }
+
     std::int32_t matched_count = 0;
     bsoncxx::stdx::optional<std::int32_t> modified_count;
     std::int32_t upserted_count = 0;
@@ -551,6 +559,10 @@ document::value run_update_one_test(collection* coll, document::view operation) 
 
     if (arguments["upsert"]) {
         options.upsert(arguments["upsert"].get_bool().value);
+    }
+
+    if (arguments["arrayFilters"]) {
+        options.array_filters(arguments["arrayFilters"].get_array().value);
     }
 
     std::int32_t matched_count = 0;
