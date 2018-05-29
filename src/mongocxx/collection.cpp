@@ -724,6 +724,10 @@ stdx::optional<result::update> collection::_update_many(const client_session* se
     if (options.upsert()) {
         update_op.upsert(*options.upsert());
     }
+    if (options.array_filters()) {
+        update_op.array_filters(*options.array_filters());
+    }
+
 
     bulk_op.append(update_op);
 
@@ -770,6 +774,9 @@ stdx::optional<result::update> collection::_update_one(const client_session* ses
     }
     if (options.upsert()) {
         update_op.upsert(*options.upsert());
+    }
+    if (options.array_filters()) {
+        update_op.array_filters(*options.array_filters());
     }
 
     bulk_op.append(update_op);
