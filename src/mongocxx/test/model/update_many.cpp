@@ -14,11 +14,11 @@
 
 #include "helpers.hpp"
 
+#include <bsoncxx/builder/basic/array.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/test_util/catch.hh>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/model/update_many.hpp>
-#include <bsoncxx/builder/basic/array.hpp>
 
 namespace {
 using namespace bsoncxx::builder::basic;

@@ -714,19 +714,24 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
         "result",
         [matched_count, modified_count, upserted_count, upserted_ids, inserted_count](
             builder::basic::sub_document subdoc) {
-          subdoc.append(builder::basic::kvp("matchedCount", matched_count));
-          subdoc.append(builder::basic::kvp("modifiedCount", modified_count));
-          subdoc.append(builder::basic::kvp("upsertedCount", upserted_count));
-          subdoc.append(builder::basic::kvp("deletedCount", 0));
-          // inserted ids are not returned in the bulk write result. According to the CRUD spec insertedIds are
-          // "NOT REQUIRED: Drivers may choose to not provide this property." So just add an empty document.
-          subdoc.append(builder::basic::kvp("insertedIds", [upserted_ids] (builder::basic::sub_document subdoc) { }));
-          subdoc.append(builder::basic::kvp("upsertedIds", [upserted_ids] (builder::basic::sub_document subdoc) {
-              for (auto&& index_and_id : upserted_ids) {
-                 subdoc.append(kvp(std::to_string(index_and_id.first), index_and_id.second.get_document().value));
-              }
-          }));
-          subdoc.append(builder::basic::kvp("insertedCount", inserted_count));
+            subdoc.append(builder::basic::kvp("matchedCount", matched_count));
+            subdoc.append(builder::basic::kvp("modifiedCount", modified_count));
+            subdoc.append(builder::basic::kvp("upsertedCount", upserted_count));
+            subdoc.append(builder::basic::kvp("deletedCount", 0));
+            // inserted ids are not returned in the bulk write result. According to the CRUD spec
+            // insertedIds are
+            // "NOT REQUIRED: Drivers may choose to not provide this property." So just add an empty
+            // document.
+            subdoc.append(builder::basic::kvp(
+                "insertedIds", [upserted_ids](builder::basic::sub_document subdoc) {}));
+            subdoc.append(builder::basic::kvp(
+                "upsertedIds", [upserted_ids](builder::basic::sub_document subdoc) {
+                    for (auto&& index_and_id : upserted_ids) {
+                        subdoc.append(kvp(std::to_string(index_and_id.first),
+                                          index_and_id.second.get_document().value));
+                    }
+                }));
+            subdoc.append(builder::basic::kvp("insertedCount", inserted_count));
         }));
 
     return result.extract();

@@ -14,8 +14,8 @@
 
 #include <mongocxx/options/find_one_and_update.hpp>
 
-#include <mongocxx/config/private/prelude.hh>
 #include <bsoncxx/array/view_or_value.hpp>
+#include <mongocxx/config/private/prelude.hh>
 
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
@@ -95,12 +95,13 @@ const stdx::optional<mongocxx::write_concern>& find_one_and_update::write_concer
     return _write_concern;
 }
 
-find_one_and_update& find_one_and_update::array_filters(bsoncxx::array::view_or_value array_filters) {
-    _array_filters = std::move (array_filters);
+find_one_and_update& find_one_and_update::array_filters(
+    bsoncxx::array::view_or_value array_filters) {
+    _array_filters = std::move(array_filters);
     return *this;
 }
 
-const stdx::optional<bsoncxx::array::view_or_value>& find_one_and_update::array_filters () const {
+const stdx::optional<bsoncxx::array::view_or_value>& find_one_and_update::array_filters() const {
     return _array_filters;
 }
 

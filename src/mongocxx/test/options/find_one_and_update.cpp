@@ -16,11 +16,11 @@
 
 #include <chrono>
 
+#include <bsoncxx/builder/basic/array.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/test_util/catch.hh>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/options/find_one_and_update.hpp>
-#include <bsoncxx/builder/basic/array.hpp>
 
 namespace {
 using namespace bsoncxx::builder::basic;

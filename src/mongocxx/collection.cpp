@@ -728,7 +728,6 @@ stdx::optional<result::update> collection::_update_many(const client_session* se
         update_op.array_filters(*options.array_filters());
     }
 
-
     bulk_op.append(update_op);
 
     auto result = bulk_op.execute();

@@ -148,7 +148,7 @@ class MONGOCXX_API update {
     ///
     /// @see https://docs.mongodb.com/manual/reference/command/update/
     ///
-    const stdx::optional<bsoncxx::array::view_or_value>& array_filters () const;
+    const stdx::optional<bsoncxx::array::view_or_value>& array_filters() const;
 
    private:
     stdx::optional<bool> _bypass_document_validation;

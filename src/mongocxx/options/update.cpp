@@ -14,9 +14,9 @@
 
 #include <mongocxx/options/update.hpp>
 
-#include <mongocxx/config/private/prelude.hh>
-#include <bsoncxx/document/view_or_value.hpp>
 #include <bsoncxx/array/view_or_value.hpp>
+#include <bsoncxx/document/view_or_value.hpp>
+#include <mongocxx/config/private/prelude.hh>
 
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
@@ -59,11 +59,11 @@ const stdx::optional<class write_concern>& update::write_concern() const {
 }
 
 update& update::array_filters(bsoncxx::array::view_or_value array_filters) {
-    _array_filters = std::move (array_filters);
+    _array_filters = std::move(array_filters);
     return *this;
 }
 
-const stdx::optional<bsoncxx::array::view_or_value>& update::array_filters () const {
+const stdx::optional<bsoncxx::array::view_or_value>& update::array_filters() const {
     return _array_filters;
 }
 

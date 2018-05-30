@@ -80,7 +80,8 @@ bulk_write& bulk_write::append(const model::write& operation) {
                 options_builder.append(kvp("upsert", *operation.get_update_one().upsert()));
             }
             if (operation.get_update_one().array_filters()) {
-                options_builder.append(kvp("arrayFilters", *operation.get_update_one().array_filters()));
+                options_builder.append(
+                    kvp("arrayFilters", *operation.get_update_one().array_filters()));
             }
             scoped_bson_t options(options_builder.extract());
 
@@ -104,7 +105,8 @@ bulk_write& bulk_write::append(const model::write& operation) {
                 options_builder.append(kvp("upsert", *operation.get_update_many().upsert()));
             }
             if (operation.get_update_one().array_filters()) {
-                options_builder.append(kvp("arrayFilters", *operation.get_update_one().array_filters()));
+                options_builder.append(
+                    kvp("arrayFilters", *operation.get_update_one().array_filters()));
             }
             scoped_bson_t options(options_builder.extract());
 

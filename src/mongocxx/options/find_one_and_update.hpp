@@ -234,26 +234,26 @@ class MONGOCXX_API find_one_and_update {
     ///
     const stdx::optional<mongocxx::write_concern>& write_concern() const;
 
-  ///
-  /// Set array filters for this operation.
-  ///
-  /// @return
-  ///   A reference to the object on which this member function is being called.  This facilitates
-  ///   method chaining.
-  ///
-  /// @see https://docs.mongodb.com/manual/reference/command/findAndModify/
-  ///
-  find_one_and_update& array_filters(bsoncxx::array::view_or_value array_filters);
+    ///
+    /// Set array filters for this operation.
+    ///
+    /// @return
+    ///   A reference to the object on which this member function is being called.  This facilitates
+    ///   method chaining.
+    ///
+    /// @see https://docs.mongodb.com/manual/reference/command/findAndModify/
+    ///
+    find_one_and_update& array_filters(bsoncxx::array::view_or_value array_filters);
 
-  ///
-  /// Get array filters for this operation.
-  ///
-  /// @return
-  ///   The current array filters.
-  ///
-  /// @see https://docs.mongodb.com/manual/reference/command/findAndModify/
-  ///
-  const stdx::optional<bsoncxx::array::view_or_value>& array_filters () const;
+    ///
+    /// Get array filters for this operation.
+    ///
+    /// @return
+    ///   The current array filters.
+    ///
+    /// @see https://docs.mongodb.com/manual/reference/command/findAndModify/
+    ///
+    const stdx::optional<bsoncxx::array::view_or_value>& array_filters() const;
 
    private:
     stdx::optional<bool> _bypass_document_validation;

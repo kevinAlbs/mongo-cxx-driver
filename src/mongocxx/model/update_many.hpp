@@ -98,22 +98,22 @@ class MONGOCXX_API update_many {
     ///
     const stdx::optional<bool>& upsert() const;
 
-  ///
-  /// Set array filters for this update operation.
-  ///
-  /// @see https://docs.mongodb.com/manual/reference/command/update/
-  ///
-  update_many& array_filters(bsoncxx::array::view_or_value array_filters);
+    ///
+    /// Set array filters for this update operation.
+    ///
+    /// @see https://docs.mongodb.com/manual/reference/command/update/
+    ///
+    update_many& array_filters(bsoncxx::array::view_or_value array_filters);
 
-  ///
-  /// Get array filters for this operation.
-  ///
-  /// @return
-  ///   The current array filters.
-  ///
-  /// @see https://docs.mongodb.com/manual/reference/command/update/
-  ///
-  const stdx::optional<bsoncxx::array::view_or_value>& array_filters () const;
+    ///
+    /// Get array filters for this operation.
+    ///
+    /// @return
+    ///   The current array filters.
+    ///
+    /// @see https://docs.mongodb.com/manual/reference/command/update/
+    ///
+    const stdx::optional<bsoncxx::array::view_or_value>& array_filters() const;
 
    private:
     bsoncxx::document::view_or_value _filter;
