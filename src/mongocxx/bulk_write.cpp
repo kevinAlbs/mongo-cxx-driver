@@ -104,9 +104,9 @@ bulk_write& bulk_write::append(const model::write& operation) {
             if (operation.get_update_many().upsert()) {
                 options_builder.append(kvp("upsert", *operation.get_update_many().upsert()));
             }
-            if (operation.get_update_one().array_filters()) {
+            if (operation.get_update_many().array_filters()) {
                 options_builder.append(
-                    kvp("arrayFilters", *operation.get_update_one().array_filters()));
+                    kvp("arrayFilters", *operation.get_update_many().array_filters()));
             }
             scoped_bson_t options(options_builder.extract());
 
