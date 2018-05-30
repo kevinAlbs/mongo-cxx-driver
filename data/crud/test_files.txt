@@ -31,10 +31,6 @@
 ./write/updateOne-pre_2.6.json
 ./write/updateOne.json
 ./write/bulkWrite-arrayFilters.json
-./write/bulkWrite-arrayFilters.yml
 ./write/findOneAndUpdate-arrayFilters.json
-./write/findOneAndUpdate-arrayFilters.yml
 ./write/updateMany-arrayFilters.json
-./write/updateMany-arrayFilters.yml
 ./write/updateOne-arrayFilters.json
-./write/updateOne-arrayFilters.yml

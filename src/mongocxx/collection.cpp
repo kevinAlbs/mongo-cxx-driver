@@ -132,7 +132,7 @@ mongocxx::stdx::optional<bsoncxx::document::value> find_and_modify(
     }
 
     if (array_filters) {
-        extra.append(kvp("array_filters", *array_filters));
+        extra.append(kvp("arrayFilters", *array_filters));
     }
 
     scoped_bson_t extra_bson{extra.view()};

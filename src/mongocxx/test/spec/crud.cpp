@@ -51,6 +51,7 @@
 #include <mongocxx/result/replace_one.hpp>
 #include <mongocxx/result/update.hpp>
 #include <mongocxx/test_util/client_helpers.hh>
+#include <iostream>
 
 namespace {
 using namespace bsoncxx;
@@ -608,6 +609,131 @@ document::value run_update_one_test(collection* coll, document::view operation) 
     return result.extract();
 }
 
+document::value run_bulk_write_test(collection* coll, document::view operation) {
+    options::bulk_write options;
+    std::vector<model::write> writes;
+    auto arguments = operation["arguments"].get_document().value;
+    if (arguments["ordered"]) {
+        options.ordered(arguments["ordered"].get_bool().value);
+    }
+    auto requests = arguments["requests"].get_array().value;
+    for (auto&& request_element : requests) {
+        auto request = request_element.get_document().value;
+        auto request_arguments = request["arguments"].get_document().value;
+        auto operation_name = request["name"].get_utf8().value;
+        if (operation_name.compare("updateOne") == 0) {
+            document::view filter = request_arguments["filter"].get_document().value;
+            document::view update = request_arguments["update"].get_document().value;
+            model::update_one update_one(filter, update);
+
+            if (request_arguments["collation"]) {
+                update_one.collation(request_arguments["collation"].get_document().value);
+            }
+
+            if (request_arguments["upsert"]) {
+                update_one.upsert(request_arguments["upsert"].get_bool().value);
+            }
+
+            if (request_arguments["arrayFilters"]) {
+                update_one.array_filters(request_arguments["arrayFilters"].get_array().value);
+            }
+
+            writes.emplace_back(update_one);
+        } else if (operation_name.compare("updateMany") == 0) {
+            document::view filter = request_arguments["filter"].get_document().value;
+            document::view update = request_arguments["update"].get_document().value;
+            model::update_many update_many(filter, update);
+
+            if (request_arguments["collation"]) {
+                update_many.collation(request_arguments["collation"].get_document().value);
+            }
+
+            if (request_arguments["upsert"]) {
+                update_many.upsert(request_arguments["upsert"].get_bool().value);
+            }
+
+            if (request_arguments["arrayFilters"]) {
+                update_many.array_filters(request_arguments["arrayFilters"].get_array().value);
+            }
+
+            writes.emplace_back(update_many);
+        } else if (operation_name.compare("replaceOne") == 0) {
+            document::view filter = request_arguments["filter"].get_document().value;
+            document::view replacement = request_arguments["replacement"].get_document().value;
+            model::replace_one replace_one(filter, replacement);
+            if (request_arguments["collation"]) {
+                replace_one.collation(arguments["collation"].get_document().value);
+            }
+
+            if (request_arguments["upsert"]) {
+                replace_one.upsert(arguments["upsert"].get_bool().value);
+            }
+
+            writes.emplace_back(replace_one);
+        } else if (operation_name.compare("insertOne") == 0) {
+            document::view document = request_arguments["document"].get_document().value;
+            model::insert_one insert_one(document);
+        } else if (operation_name.compare("deleteOne") == 0) {
+            document::view filter = request_arguments["filter"].get_document().value;
+            model::delete_one delete_one(filter);
+            if (request_arguments["collation"]) {
+                delete_one.collation(arguments["collation"].get_document().value);
+            }
+
+            writes.emplace_back(delete_one);
+        } else if (operation_name.compare("deleteMany") == 0) {
+            document::view filter = request_arguments["filter"].get_document().value;
+            model::delete_many delete_many(filter);
+            if (request_arguments["collation"]) {
+                delete_many.collation(arguments["collation"].get_document().value);
+            }
+
+            writes.emplace_back(delete_many);
+        } else {
+            /* should not happen. */
+            REQUIRE(false);
+        }
+    }
+
+    std::int32_t deleted_count;
+    /* note, the C++ driver does not return the inserted ids and isn't required to. */
+    /* result::bulk_write::id_map inserted_ids; */
+    std::int32_t matched_count;
+    std::int32_t modified_count;
+    std::int32_t upserted_count;
+    result::bulk_write::id_map upserted_ids;
+    std::int32_t inserted_count;
+    auto bulk_write_result = coll->bulk_write(writes);
+    if (bulk_write_result) {
+        matched_count = bulk_write_result->matched_count();
+        modified_count = bulk_write_result->modified_count();
+        upserted_count = bulk_write_result->upserted_count();
+        upserted_ids = bulk_write_result->upserted_ids();
+        inserted_count = bulk_write_result->inserted_count();
+    }
+    auto result = builder::basic::document{};
+    result.append(builder::basic::kvp(
+        "result",
+        [matched_count, modified_count, upserted_count, upserted_ids, inserted_count](
+            builder::basic::sub_document subdoc) {
+          subdoc.append(builder::basic::kvp("matchedCount", matched_count));
+          subdoc.append(builder::basic::kvp("modifiedCount", modified_count));
+          subdoc.append(builder::basic::kvp("upsertedCount", upserted_count));
+          subdoc.append(builder::basic::kvp("deletedCount", 0));
+          // inserted ids are not returned in the bulk write result. According to the CRUD spec insertedIds are
+          // "NOT REQUIRED: Drivers may choose to not provide this property."
+          subdoc.append(builder::basic::kvp("insertedIds", [upserted_ids] (builder::basic::sub_document subdoc) { }));
+          subdoc.append(builder::basic::kvp("upsertedIds", [upserted_ids] (builder::basic::sub_document subdoc) {
+              for (auto&& index_and_id : upserted_ids) {
+                 subdoc.append(kvp(std::to_string(index_and_id.first), index_and_id.second.get_document().value));
+              }
+          }));
+          subdoc.append(builder::basic::kvp("insertedCount", inserted_count));
+        }));
+
+    return result.extract();
+}
+
 std::map<std::string, std::function<document::value(collection*, document::view)>>
     crud_test_runners = {{"aggregate", run_aggregate_test},
                          {"count", run_count_test},
@@ -622,7 +748,8 @@ std::map<std::string, std::function<document::value(collection*, document::view)
                          {"insertOne", run_insert_one_test},
                          {"replaceOne", run_replace_one_test},
                          {"updateMany", run_update_many_test},
-                         {"updateOne", run_update_one_test}};
+                         {"updateOne", run_update_one_test},
+                         {"bulkWrite", run_bulk_write_test}};
 
 // Clears the collection and initialize it as the spec describes.
 void initialize_collection(collection* coll, array::view initial_data) {
