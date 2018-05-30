@@ -96,7 +96,7 @@ const stdx::optional<mongocxx::write_concern>& find_one_and_update::write_concer
 }
 
 find_one_and_update& find_one_and_update::array_filters(bsoncxx::array::view_or_value array_filters) {
-    *_array_filters = std::move (array_filters);
+    _array_filters = std::move (array_filters);
     return *this;
 }
 

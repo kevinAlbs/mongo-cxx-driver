@@ -59,7 +59,7 @@ const stdx::optional<class write_concern>& update::write_concern() const {
 }
 
 update& update::array_filters(bsoncxx::array::view_or_value array_filters) {
-    *_array_filters = std::move (array_filters);
+    _array_filters = std::move (array_filters);
     return *this;
 }
 

@@ -52,7 +52,7 @@ const stdx::optional<bool>& update_one::upsert() const {
 }
 
 update_one& update_one::array_filters(bsoncxx::array::view_or_value array_filters) {
-    *_array_filters = std::move (array_filters);
+    _array_filters = std::move (array_filters);
     return *this;
 }
 
