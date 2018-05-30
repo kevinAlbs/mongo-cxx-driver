@@ -51,7 +51,6 @@
 #include <mongocxx/result/replace_one.hpp>
 #include <mongocxx/result/update.hpp>
 #include <mongocxx/test_util/client_helpers.hh>
-#include <iostream>
 
 namespace {
 using namespace bsoncxx;
@@ -673,6 +672,7 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
         } else if (operation_name.compare("insertOne") == 0) {
             document::view document = request_arguments["document"].get_document().value;
             model::insert_one insert_one(document);
+            writes.emplace_back(insert_one);
         } else if (operation_name.compare("deleteOne") == 0) {
             document::view filter = request_arguments["filter"].get_document().value;
             model::delete_one delete_one(filter);
@@ -696,8 +696,6 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
     }
 
     std::int32_t deleted_count;
-    /* note, the C++ driver does not return the inserted ids and isn't required to. */
-    /* result::bulk_write::id_map inserted_ids; */
     std::int32_t matched_count;
     std::int32_t modified_count;
     std::int32_t upserted_count;
@@ -721,7 +719,7 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
           subdoc.append(builder::basic::kvp("upsertedCount", upserted_count));
           subdoc.append(builder::basic::kvp("deletedCount", 0));
           // inserted ids are not returned in the bulk write result. According to the CRUD spec insertedIds are
-          // "NOT REQUIRED: Drivers may choose to not provide this property."
+          // "NOT REQUIRED: Drivers may choose to not provide this property." So just add an empty document.
           subdoc.append(builder::basic::kvp("insertedIds", [upserted_ids] (builder::basic::sub_document subdoc) { }));
           subdoc.append(builder::basic::kvp("upsertedIds", [upserted_ids] (builder::basic::sub_document subdoc) {
               for (auto&& index_and_id : upserted_ids) {
