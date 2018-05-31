@@ -380,6 +380,8 @@ document::value run_find_one_and_update_test(collection* coll, document::view op
 }
 
 document::value run_insert_many_test(collection* coll, document::view operation) {
+    using bsoncxx::builder::basic::kvp;
+    using bsoncxx::builder::basic::make_document;
     document::view arguments = operation["arguments"].get_document().value;
     array::view documents = arguments["documents"].get_array().value;
     std::vector<document::view> documents_to_insert{};
@@ -396,18 +398,13 @@ document::value run_insert_many_test(collection* coll, document::view operation)
     }
 
     auto result = builder::basic::document{};
+    bsoncxx::builder::basic::document inserted_ids_builder;
 
-    result.append(
-        builder::basic::kvp("result", [&inserted_ids](builder::basic::sub_document subdoc) {
-            subdoc.append(builder::basic::kvp(
-                "insertedIds", [&inserted_ids](builder::basic::sub_document subdoc) {
-                    for (auto&& id_pair : inserted_ids) {
-                        subdoc.append(
-                            kvp(std::to_string(id_pair.first), id_pair.second.get_value()));
-                    }
-                }));
-        }));
+    for (auto&& id_pair : inserted_ids) {
+        inserted_ids_builder.append(kvp(std::to_string(id_pair.first), id_pair.second.get_value()));
+    }
 
+    result.append(kvp("result", make_document(kvp("insertedIds", inserted_ids_builder.extract()))));
     return result.extract();
 }
 
@@ -723,7 +720,7 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
     auto result = bsoncxx::builder::basic::document{};
     // Construct the result document.
     // Note: insertedIds is currently hard coded as an empty document, because result::bulk_write
-    // provides no way to inserted see ids. This is compliant with the CRUD spec, as insertedIds
+    // provides no way to see inserted ids. This is compliant with the CRUD spec, as insertedIds
     // are: "NOT REQUIRED: Drivers may choose to not provide this property." So just add an empty
     // document for insertedIds. There are no current bulk write tests testing insert operations.
     // The insertedIds field in current bulk write spec tests is always an empty document.
