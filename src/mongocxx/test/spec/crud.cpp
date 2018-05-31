@@ -399,12 +399,13 @@ document::value run_insert_many_test(collection* coll, document::view operation)
 
     result.append(
         builder::basic::kvp("result", [&inserted_ids](builder::basic::sub_document subdoc) {
-            subdoc.append(builder::basic::kvp("insertedIds",
-                                              [&inserted_ids](builder::basic::sub_array subarr) {
-                                                  for (auto&& id_pair : inserted_ids) {
-                                                      subarr.append(id_pair.second.get_value());
-                                                  }
-                                              }));
+            subdoc.append(builder::basic::kvp(
+                "insertedIds", [&inserted_ids](builder::basic::sub_document subdoc) {
+                    for (auto&& id_pair : inserted_ids) {
+                        subdoc.append(
+                            kvp(std::to_string(id_pair.first), id_pair.second.get_value()));
+                    }
+                }));
         }));
 
     return result.extract();
@@ -609,6 +610,9 @@ document::value run_update_one_test(collection* coll, document::view operation) 
 }
 
 document::value run_bulk_write_test(collection* coll, document::view operation) {
+    using bsoncxx::builder::basic::kvp;
+    using bsoncxx::builder::basic::make_document;
+
     options::bulk_write options;
     std::vector<model::write> writes;
     auto arguments = operation["arguments"].get_document().value;
@@ -695,12 +699,12 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
         }
     }
 
-    std::int32_t deleted_count;
-    std::int32_t matched_count;
-    std::int32_t modified_count;
-    std::int32_t upserted_count;
+    std::int32_t deleted_count = 0;
+    std::int32_t matched_count = 0;
+    std::int32_t modified_count = 0;
+    std::int32_t upserted_count = 0;
     result::bulk_write::id_map upserted_ids;
-    std::int32_t inserted_count;
+    std::int32_t inserted_count = 0;
     auto bulk_write_result = coll->bulk_write(writes);
     if (bulk_write_result) {
         matched_count = bulk_write_result->matched_count();
@@ -708,32 +712,29 @@ document::value run_bulk_write_test(collection* coll, document::view operation) 
         upserted_count = bulk_write_result->upserted_count();
         upserted_ids = bulk_write_result->upserted_ids();
         inserted_count = bulk_write_result->inserted_count();
+        deleted_count = bulk_write_result->deleted_count();
     }
-    auto result = builder::basic::document{};
-    result.append(builder::basic::kvp(
-        "result",
-        [matched_count, modified_count, upserted_count, upserted_ids, inserted_count](
-            builder::basic::sub_document subdoc) {
-            subdoc.append(builder::basic::kvp("matchedCount", matched_count));
-            subdoc.append(builder::basic::kvp("modifiedCount", modified_count));
-            subdoc.append(builder::basic::kvp("upsertedCount", upserted_count));
-            subdoc.append(builder::basic::kvp("deletedCount", 0));
-            // inserted ids are not returned in the bulk write result. According to the CRUD spec
-            // insertedIds are
-            // "NOT REQUIRED: Drivers may choose to not provide this property." So just add an empty
-            // document.
-            subdoc.append(builder::basic::kvp(
-                "insertedIds", [upserted_ids](builder::basic::sub_document subdoc) {}));
-            subdoc.append(builder::basic::kvp(
-                "upsertedIds", [upserted_ids](builder::basic::sub_document subdoc) {
-                    for (auto&& index_and_id : upserted_ids) {
-                        subdoc.append(kvp(std::to_string(index_and_id.first),
-                                          index_and_id.second.get_document().value));
-                    }
-                }));
-            subdoc.append(builder::basic::kvp("insertedCount", inserted_count));
-        }));
-
+    bsoncxx::builder::basic::document upserted_ids_builder;
+    for (auto&& index_and_id : upserted_ids) {
+        upserted_ids_builder.append(
+            kvp(std::to_string(index_and_id.first), index_and_id.second.get_document().value));
+    }
+    auto upserted_ids_doc = upserted_ids_builder.extract();
+    auto result = bsoncxx::builder::basic::document{};
+    // Construct the result document.
+    // Note: insertedIds is currently hard coded as an empty document, because result::bulk_write
+    // provides no way to inserted see ids. This is compliant with the CRUD spec, as insertedIds
+    // are: "NOT REQUIRED: Drivers may choose to not provide this property." So just add an empty
+    // document for insertedIds. There are no current bulk write tests testing insert operations.
+    // The insertedIds field in current bulk write spec tests is always an empty document.
+    result.append(kvp("result",
+                      make_document(kvp("matchedCount", matched_count),
+                                    kvp("modifiedCount", modified_count),
+                                    kvp("upsertedCount", upserted_count),
+                                    kvp("deletedCount", deleted_count),
+                                    kvp("insertedCount", inserted_count),
+                                    kvp("insertedIds", make_document()),
+                                    kvp("upsertedIds", upserted_ids_doc))));
     return result.extract();
 }
 

@@ -101,6 +101,9 @@ class MONGOCXX_API update_one {
     ///
     /// Set array filters for this update operation.
     ///
+    /// @param array_filters
+    ///   Array representing filters determining which array elements to modify.
+    ///
     /// @see https://docs.mongodb.com/manual/reference/command/update/
     ///
     update_one& array_filters(bsoncxx::array::view_or_value array_filters);

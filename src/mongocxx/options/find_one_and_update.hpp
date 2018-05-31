@@ -237,6 +237,9 @@ class MONGOCXX_API find_one_and_update {
     ///
     /// Set array filters for this operation.
     ///
+    /// @param array_filters
+    ///   Array representing filters determining which array elements to modify.
+    ///
     /// @return
     ///   A reference to the object on which this member function is being called.  This facilitates
     ///   method chaining.

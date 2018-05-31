@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #pragma once
+
 #include <bsoncxx/array/view_or_value.hpp>
 #include <bsoncxx/document/view_or_value.hpp>
 #include <bsoncxx/stdx/optional.hpp>
@@ -131,6 +132,9 @@ class MONGOCXX_API update {
 
     ///
     /// Set array filters for this operation.
+    ///
+    /// @param array_filters
+    ///   Array representing filters determining which array elements to modify.
     ///
     /// @return
     ///   A reference to the object on which this member function is being called.  This facilitates
