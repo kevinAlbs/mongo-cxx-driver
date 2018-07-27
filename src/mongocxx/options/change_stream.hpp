@@ -18,6 +18,7 @@
 
 #include <bsoncxx/document/view_or_value.hpp>
 #include <bsoncxx/string/view_or_value.hpp>
+#include <bsoncxx/types.hpp>
 #include <mongocxx/stdx.hpp>
 
 #include <mongocxx/config/prelude.hpp>
@@ -139,12 +140,32 @@ class MONGOCXX_API change_stream {
     ///
     const stdx::optional<std::chrono::milliseconds>& max_await_time() const;
 
+    ///
+    /// Specifies the logical starting point for the new change stream. Changes are returned at or after the specified
+    /// operation time.
+    ///
+    /// @param operation_time
+    ///   The starting operation time.
+    ///
+    /// @return
+    ///   A reference to the object on which this member function is being called. This facilitates method chaining.
+    change_stream& start_at_operation_time (bsoncxx::types::b_timestamp timestamp);
+
+    ///
+    /// Retrieves the current starting operation time for this change stream.
+    ///
+    /// @return
+    ///   The current starting operation time
+    ///
+    const stdx::optional<bsoncxx::types::b_timestamp>& start_at_operation_time () const;
+
    private:
     stdx::optional<bsoncxx::string::view_or_value> _full_document;
     stdx::optional<std::int32_t> _batch_size;
     stdx::optional<bsoncxx::document::view_or_value> _collation;
     stdx::optional<bsoncxx::document::view_or_value> _resume_after;
     stdx::optional<std::chrono::milliseconds> _max_await_time;
+    stdx::optional<bsoncxx::types::b_timestamp> _start_at_operation_time;
 };
 }  // namespace options
 MONGOCXX_INLINE_NAMESPACE_END

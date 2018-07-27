@@ -72,6 +72,15 @@ const stdx::optional<std::chrono::milliseconds>& change_stream::max_await_time()
     return _max_await_time;
 }
 
+change_stream& change_stream::start_at_operation_time (bsoncxx::types::b_timestamp timestamp) {
+    _start_at_operation_time = timestamp;
+    return *this;
+}
+
+const bsoncxx::types::b_timestamp change_stream::start_at_operation_time() const {
+    return _start_at_operation_time;
+}
+
 }  // namespace options
 MONGOCXX_INLINE_NAMESPACE_END
 }  // namespace mongocxx
