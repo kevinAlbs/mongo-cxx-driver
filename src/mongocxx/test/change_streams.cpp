@@ -195,7 +195,7 @@ TEST_CASE("Mock streams and error-handling") {
 
     SECTION("Pipeline and opts are passed for all watch helpers") {
         bsoncxx::types::b_timestamp ts{1, 2};
-        uint32_t batch_size = 3;
+        std::int32_t batch_size = 3;
         std::chrono::milliseconds max_await_time_ms{4};
         bool collection_watch_called = false, database_watch_called = false,
              client_watch_called = true;
@@ -250,7 +250,8 @@ TEST_CASE("Mock streams and error-handling") {
             });
 
         client_watch->interpose(
-            [&](const mongoc_client_t* db, const bson_t* pipeline, const bson_t* opts) {
+            [&](const mongoc_client_t* client, const bson_t* pipeline, const bson_t* opts) {
+                (void) client;
                 check_pipeline_and_opts(pipeline, opts);
                 client_watch_called = true;
                 return nullptr;
