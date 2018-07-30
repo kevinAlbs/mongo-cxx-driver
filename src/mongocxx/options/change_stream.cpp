@@ -102,6 +102,8 @@ bsoncxx::document::value change_stream::as_bson() const {
     append_if(out, "fullDocument", full_document());
     append_if(out, "resumeAfter", resume_after());
     append_if(out, "batchSize", batch_size());
+    append_if(out, "collation", collation());
+    append_if(out, "startAtOperationTime", start_at_operation_time());
 
     if (max_await_time()) {
         auto count = max_await_time().value().count();

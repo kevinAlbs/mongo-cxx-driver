@@ -192,6 +192,42 @@ TEST_CASE("Mock streams and error-handling") {
             }
         }
     }
+
+    SECTION("Options are passed through") {
+        bsoncxx::types::b_timestamp ts{1, 2};
+        uint32_t batch_size = 3;
+        std::chrono::milliseconds max_await_time_ms {4};
+        bool watch_called = false;
+        bsoncxx::document::value collation = make_document(kvp("locale", "en"));
+        std::string full_document = "updateLookup";
+        bsoncxx::document::value resume_after = make_document(kvp("resume", "token"));
+
+        options::change_stream cs_opts;
+
+        cs_opts.batch_size(batch_size);
+        cs_opts.start_at_operation_time(ts);
+        cs_opts.max_await_time(max_await_time_ms);
+        cs_opts.collation(collation.view());
+        cs_opts.full_document(full_document);
+        cs_opts.resume_after(resume_after.view());
+
+        collection_watch->interpose([&](const mongoc_collection_t* coll, const bson_t* pipeline, const bson_t* passed_opts){
+            bsoncxx::document::view opts (bson_get_data(passed_opts), passed_opts->len);
+            REQUIRE (opts["startAtOperationTime"].get_timestamp() == ts);
+            REQUIRE (opts["batchSize"].get_int32() == batch_size);
+            REQUIRE (opts["maxAwaitTimeMS"].get_int64() == 4);
+            REQUIRE (opts["collation"].get_document().view() == collation);
+            REQUIRE (opts["fullDocument"].get_utf8().value == bsoncxx::stdx::string_view{full_document});
+            REQUIRE (opts["resumeAfter"].get_document().view() == resume_after);
+            watch_called = true;
+            return nullptr;
+        });
+
+        events.watch(cs_opts);
+
+        // Ensure the interpose was called.
+        REQUIRE (watch_called);
+    }
 }
 
 // Put this before other tests which assume the collections already exists.
