@@ -17,6 +17,8 @@
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/builder/basic/kvp.hpp>
 #include <bsoncxx/builder/core.hpp>
+#include <mongocxx/exception/error_code.hpp>
+#include <mongocxx/exception/logic_error.hpp>
 
 #include <mongocxx/config/private/prelude.hh>
 
@@ -77,8 +79,39 @@ change_stream& change_stream::start_at_operation_time (bsoncxx::types::b_timesta
     return *this;
 }
 
-const bsoncxx::types::b_timestamp change_stream::start_at_operation_time() const {
+const stdx::optional<bsoncxx::types::b_timestamp>& change_stream::start_at_operation_time() const {
     return _start_at_operation_time;
+}
+
+namespace {
+// TODO: Consider extending the builders to directly accept optional values.
+template<typename T>
+inline void append_if(bsoncxx::builder::basic::document &doc,
+                      const std::string &key,
+                      const mongocxx::stdx::optional<T> &opt) {
+    if (opt) {
+        doc.append(bsoncxx::builder::basic::kvp(key, opt.value()));
+    }
+}
+}
+
+bsoncxx::document::value change_stream::as_bson() const {
+    // Construct new bson rep each time since values may change after this is called.
+    bsoncxx::builder::basic::document out{};
+
+    append_if(out, "fullDocument", full_document());
+    append_if(out, "resumeAfter", resume_after());
+    append_if(out, "batchSize", batch_size());
+
+    if (max_await_time()) {
+        auto count = max_await_time().value().count();
+        if ((count < 0) || (count >= std::numeric_limits<std::uint32_t>::max())) {
+            throw mongocxx::logic_error{mongocxx::error_code::k_invalid_parameter};
+        }
+        out.append(bsoncxx::builder::basic::kvp("maxAwaitTimeMS", count));
+    }
+
+    return out.extract();
 }
 
 }  // namespace options
