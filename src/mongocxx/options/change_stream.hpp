@@ -26,7 +26,9 @@
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
 
+class client;
 class collection;
+class database;
 
 namespace options {
 
@@ -163,7 +165,9 @@ class MONGOCXX_API change_stream {
     const stdx::optional<bsoncxx::types::b_timestamp>& start_at_operation_time () const;
 
    private:
+    friend class ::mongocxx::client;
     friend class ::mongocxx::collection;
+    friend class ::mongocxx::database;
 
     bsoncxx::document::value as_bson () const;
     stdx::optional<bsoncxx::string::view_or_value> _full_document;

@@ -93,7 +93,7 @@ inline void append_if(bsoncxx::builder::basic::document &doc,
         doc.append(bsoncxx::builder::basic::kvp(key, opt.value()));
     }
 }
-}
+} // namespace
 
 bsoncxx::document::value change_stream::as_bson() const {
     // Construct new bson rep each time since values may change after this is called.
