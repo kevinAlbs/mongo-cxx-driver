@@ -439,7 +439,7 @@ class change_stream database::watch(const options::change_stream& options) {
 }
 
 class change_stream database::watch(const client_session& session,
-                                      const options::change_stream& options) {
+                                    const options::change_stream& options) {
     return _watch(&session, pipeline{}, options);
 }
 
@@ -448,14 +448,14 @@ class change_stream database::watch(const pipeline& pipe, const options::change_
 }
 
 class change_stream database::watch(const client_session& session,
-                                      const pipeline& pipe,
-                                      const options::change_stream& options) {
+                                    const pipeline& pipe,
+                                    const options::change_stream& options) {
     return _watch(&session, pipe, options);
 }
 
 class change_stream database::_watch(const client_session* session,
-                                       const pipeline& pipe,
-                                       const options::change_stream& options) {
+                                     const pipeline& pipe,
+                                     const options::change_stream& options) {
     bsoncxx::builder::basic::document container;
     container.append(kvp("pipeline", pipe._impl->view_array()));
     scoped_bson_t pipeline_bson{container.view()};

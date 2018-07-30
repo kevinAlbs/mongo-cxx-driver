@@ -74,7 +74,7 @@ const stdx::optional<std::chrono::milliseconds>& change_stream::max_await_time()
     return _max_await_time;
 }
 
-change_stream& change_stream::start_at_operation_time (bsoncxx::types::b_timestamp timestamp) {
+change_stream& change_stream::start_at_operation_time(bsoncxx::types::b_timestamp timestamp) {
     _start_at_operation_time = timestamp;
     return *this;
 }
@@ -85,15 +85,15 @@ const stdx::optional<bsoncxx::types::b_timestamp>& change_stream::start_at_opera
 
 namespace {
 // TODO: Consider extending the builders to directly accept optional values.
-template<typename T>
-inline void append_if(bsoncxx::builder::basic::document &doc,
-                      const std::string &key,
-                      const mongocxx::stdx::optional<T> &opt) {
+template <typename T>
+inline void append_if(bsoncxx::builder::basic::document& doc,
+                      const std::string& key,
+                      const mongocxx::stdx::optional<T>& opt) {
     if (opt) {
         doc.append(bsoncxx::builder::basic::kvp(key, opt.value()));
     }
 }
-} // namespace
+}  // namespace
 
 bsoncxx::document::value change_stream::as_bson() const {
     // Construct new bson rep each time since values may change after this is called.

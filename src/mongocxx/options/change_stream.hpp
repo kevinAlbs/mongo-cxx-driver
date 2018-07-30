@@ -146,15 +146,17 @@ class MONGOCXX_API change_stream {
     const stdx::optional<std::chrono::milliseconds>& max_await_time() const;
 
     ///
-    /// Specifies the logical starting point for the new change stream. Changes are returned at or after the specified
+    /// Specifies the logical starting point for the new change stream. Changes are returned at or
+    /// after the specified
     /// operation time.
     ///
     /// @param operation_time
     ///   The starting operation time.
     ///
     /// @return
-    ///   A reference to the object on which this member function is being called. This facilitates method chaining.
-    change_stream& start_at_operation_time (bsoncxx::types::b_timestamp timestamp);
+    ///   A reference to the object on which this member function is being called. This facilitates
+    ///   method chaining.
+    change_stream& start_at_operation_time(bsoncxx::types::b_timestamp timestamp);
 
     ///
     /// Retrieves the current starting operation time for this change stream.
@@ -162,14 +164,14 @@ class MONGOCXX_API change_stream {
     /// @return
     ///   The current starting operation time
     ///
-    const stdx::optional<bsoncxx::types::b_timestamp>& start_at_operation_time () const;
+    const stdx::optional<bsoncxx::types::b_timestamp>& start_at_operation_time() const;
 
    private:
     friend class ::mongocxx::client;
     friend class ::mongocxx::collection;
     friend class ::mongocxx::database;
 
-    bsoncxx::document::value as_bson () const;
+    bsoncxx::document::value as_bson() const;
     stdx::optional<bsoncxx::string::view_or_value> _full_document;
     stdx::optional<std::int32_t> _batch_size;
     stdx::optional<bsoncxx::document::view_or_value> _collation;

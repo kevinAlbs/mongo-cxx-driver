@@ -339,8 +339,8 @@ class MONGOCXX_API client {
     /// @see https://docs.mongodb.com/manual/changeStreams/
     ///
     change_stream watch(const client_session& session,
-                      const pipeline& pipe,
-                      const options::change_stream& options = {});
+                        const pipeline& pipe,
+                        const options::change_stream& options = {});
 
     ///
     /// @}
