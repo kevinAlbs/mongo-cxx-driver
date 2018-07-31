@@ -84,7 +84,6 @@ const stdx::optional<bsoncxx::types::b_timestamp>& change_stream::start_at_opera
 }
 
 namespace {
-// TODO: Consider extending the builders to directly accept optional values.
 template <typename T>
 inline void append_if(bsoncxx::builder::basic::document& doc,
                       const std::string& key,

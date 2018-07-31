@@ -197,17 +197,16 @@ TEST_CASE("Mock streams and error-handling") {
         bsoncxx::types::b_timestamp ts{1, 2};
         std::int32_t batch_size = 3;
         std::chrono::milliseconds max_await_time_ms{4};
-        bool collection_watch_called = false, database_watch_called = false,
-             client_watch_called = true;
+        bool collection_watch_called = false;
+        bool database_watch_called = false;
+        bool client_watch_called = true;
         bsoncxx::document::value collation = make_document(kvp("locale", "en"));
         std::string full_document = "updateLookup";
         bsoncxx::document::value resume_after = make_document(kvp("resume", "token"));
         mongocxx::pipeline cs_pipeline;
-
         cs_pipeline.match(make_document(kvp("x", 1)));
 
         options::change_stream cs_opts;
-
         cs_opts.batch_size(batch_size);
         cs_opts.start_at_operation_time(ts);
         cs_opts.max_await_time(max_await_time_ms);

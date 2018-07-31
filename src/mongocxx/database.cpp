@@ -469,7 +469,6 @@ class change_stream database::_watch(const client_session* session,
 
     scoped_bson_t options_bson{options_builder.extract()};
 
-    // NOTE: collection_watch copies what it needs so we're safe to destroy our copies.
     return change_stream{libmongoc::database_watch(
         _get_impl().database_t, pipeline_bson.bson(), options_bson.bson())};
 }

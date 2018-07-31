@@ -156,6 +156,7 @@ class MONGOCXX_API change_stream {
     /// @return
     ///   A reference to the object on which this member function is being called. This facilitates
     ///   method chaining.
+    ///
     change_stream& start_at_operation_time(bsoncxx::types::b_timestamp timestamp);
 
     ///
