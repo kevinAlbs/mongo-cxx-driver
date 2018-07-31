@@ -75,7 +75,7 @@ const stdx::optional<std::chrono::milliseconds>& change_stream::max_await_time()
 }
 
 change_stream& change_stream::start_at_operation_time(bsoncxx::types::b_timestamp timestamp) {
-    _start_at_operation_time = std::move(timestamp);
+    *_start_at_operation_time = std::move(timestamp);
     return *this;
 }
 
