@@ -251,7 +251,7 @@ TEST_CASE("Mock streams and error-handling") {
 
         client_watch->interpose(
             [&](const mongoc_client_t* client, const bson_t* pipeline, const bson_t* opts) {
-                (void) client;
+                (void)client;
                 check_pipeline_and_opts(pipeline, opts);
                 client_watch_called = true;
                 return nullptr;
