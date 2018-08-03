@@ -264,6 +264,8 @@ types::b_array element::get_array() const {
     return types::b_array{array::view{buf, len}};
 }
 
+
+
 types::value element::get_value() const {
     switch (static_cast<int>(type())) {
 #define BSONCXX_ENUM(type, val) \
