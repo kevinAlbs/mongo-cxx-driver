@@ -203,11 +203,12 @@ bool is_replica_set(const client& client) {
 ///
 /// Determines if the server is a part of a sharded cluster.
 ///
-std::string get_topology (const client& client) {
+std::string get_topology(const client& client) {
     auto reply = client["admin"].run_command(make_document(kvp("isMaster", 1)));
     if (reply.view()["setName"]) {
         return "replicaset";
-    } else if (reply.view()["msg"] && std::string(reply.view()["msg"].get_utf8().value) == "isdbgrid") {
+    } else if (reply.view()["msg"] &&
+               std::string(reply.view()["msg"].get_utf8().value) == "isdbgrid") {
         return "sharded";
     } else {
         return "single";

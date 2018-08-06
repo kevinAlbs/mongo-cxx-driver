@@ -77,7 +77,7 @@ bool is_replica_set(const client& client);
 ///
 /// Returns "standalone", "replicaset", or "sharded".
 ///
-std::string get_topology (const client& client);
+std::string get_topology(const client& client);
 
 ///
 /// Parses a JSON file at a given path and return it as a BSON document value.
