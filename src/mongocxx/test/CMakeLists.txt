@@ -73,6 +73,9 @@ set(test_driver_sources
     write_concern.cpp
 )
 
+set(spec_test_common
+    spec/operation.cpp)
+
 add_executable(test_driver
     ${CMAKE_SOURCE_DIR}/src/mongocxx/test_util/client_helpers.cpp
     ${THIRD_PARTY_SOURCE_DIR}/catch/main.cpp
@@ -93,18 +96,21 @@ add_executable(test_crud_specs
     ${CMAKE_SOURCE_DIR}/src/mongocxx/test_util/client_helpers.cpp
     ${THIRD_PARTY_SOURCE_DIR}/catch/main.cpp
     spec/crud.cpp
+    ${spec_test_common}
 )
 
 add_executable(test_change_stream_specs
     ${CMAKE_SOURCE_DIR}/src/mongocxx/test_util/client_helpers.cpp
     ${THIRD_PARTY_SOURCE_DIR}/catch/main.cpp
     spec/change_stream.cpp
+    ${spec_test_common}
 )
 
 add_executable(test_gridfs_specs
     ${CMAKE_SOURCE_DIR}/src/mongocxx/test_util/client_helpers.cpp
     ${THIRD_PARTY_SOURCE_DIR}/catch/main.cpp
     spec/gridfs.cpp
+    ${spec_test_common}
 )
 
 target_link_libraries(test_driver mongocxx_mocked ${libmongoc_libraries})

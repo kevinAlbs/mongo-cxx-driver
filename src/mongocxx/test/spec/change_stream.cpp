@@ -30,6 +30,7 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
 #include <mongocxx/instance.hpp>
+#include <mongocxx/test/spec/operation.hh>
 #include <mongocxx/test_util/client_helpers.hh>
 #include <mongocxx/uri.hpp>
 
@@ -37,6 +38,7 @@ namespace {
 using namespace mongocxx;
 using namespace bsoncxx;
 using namespace bsoncxx::string;
+using namespace spec;
 
 double as_double(bsoncxx::types::value value) {
     if (value.type() == type::k_int32) {
@@ -105,49 +107,6 @@ bool matches(document::view doc, document::view pattern) {
     return matches(types::value{types::b_document{doc}}, types::value{types::b_document{pattern}});
 }
 
-pipeline build_pipeline(array::view pipeline_docs) {
-    pipeline pipeline{};
-
-    for (auto&& element : pipeline_docs) {
-        document::view document = element.get_document();
-
-        if (document["$match"]) {
-            pipeline.match(document["$match"].get_document().value);
-        } else if (document["$out"]) {
-            pipeline.out(string::to_string(document["$out"].get_utf8().value));
-        } else if (document["$sort"]) {
-            pipeline.sort(document["$sort"].get_document().value);
-        } else {
-            REQUIRE(false);
-        }
-    }
-
-    return pipeline;
-}
-
-document::value run_insert_one_test(collection* coll, document::view operation) {
-    document::view arguments = operation["arguments"].get_document().value;
-    document::view document = arguments["document"].get_document().value;
-    auto result = builder::basic::document{};
-    auto insert_one_result = coll->insert_one(document);
-    types::value inserted_id{types::b_null{}};
-
-    if (insert_one_result) {
-        inserted_id = insert_one_result->inserted_id();
-    }
-
-    using namespace bsoncxx::builder::basic;
-
-    result.append(builder::basic::kvp("result", [inserted_id](builder::basic::sub_document subdoc) {
-        subdoc.append(builder::basic::kvp("insertedId", inserted_id));
-    }));
-
-    return result.extract();
-}
-
-std::map<std::string, std::function<document::value(collection*, document::view)>>
-    crud_test_runners = {{"insertOne", run_insert_one_test}};
-
 class test_ctx {
    public:
     test_ctx(document::view test_specs_view, class client& client) : client(client) {
@@ -188,17 +147,13 @@ class test_ctx {
                 auto dbname = to_string(operation["database"].get_utf8().value);
                 auto collname = to_string(operation["collection"].get_utf8().value);
                 auto coll = client[dbname][collname];
-                if (crud_test_runners.find(operation_name) == crud_test_runners.end()) {
-                    WARN ("unsupported operation: " << operation_name);
-                    REQUIRE (false);
-                }
-                crud_test_runners[operation_name](&coll, operation.get_document().value);
+                get_test_runners()[operation_name](&coll, operation.get_document().value);
             }
         }
     }
 
- private:
-  // TODO: rename to use _
+   private:
+    // TODO: rename to use _
     std::string db1_name;
     std::string db2_name;
     std::string coll1_name;
