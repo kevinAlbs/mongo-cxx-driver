@@ -22,11 +22,13 @@
 #include <bsoncxx/document/view.hpp>
 #include <bsoncxx/json.hpp>
 #include <bsoncxx/stdx/optional.hpp>
+#include <bsoncxx/stdx/optional.hpp>
 #include <bsoncxx/stdx/string_view.hpp>
 #include <bsoncxx/string/to_string.hpp>
 #include <bsoncxx/test_util/catch.hh>
 #include <mongocxx/change_stream.hpp>
 #include <mongocxx/client.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/test_util/client_helpers.hh>
 #include <mongocxx/uri.hpp>
@@ -35,6 +37,73 @@ namespace {
 using namespace mongocxx;
 using namespace bsoncxx;
 using namespace bsoncxx::string;
+
+double as_double(bsoncxx::types::value value) {
+    if (value.type() == type::k_int32) {
+        return static_cast<double>(value.get_int32());
+    }
+    if (value.type() == type::k_int64) {
+        return static_cast<double>(value.get_int64());
+    }
+    if (value.type() == type::k_double) {
+        return static_cast<double>(value.get_double());
+    }
+    REQUIRE(false);
+    return 0;
+}
+
+bool is_numeric(types::value value) {
+    return value.type() == type::k_int32 || value.type() == type::k_int64 ||
+           value.type() == type::k_double;
+}
+
+bool matches(types::value main, types::value pattern) {
+    if (is_numeric(pattern) && as_double(pattern) == 42) {
+        return true;
+    }
+
+    // Different numeric types are considered equal.
+    if (is_numeric(main) && is_numeric(pattern) && as_double(main) == as_double(pattern)) {
+        return true;
+    }
+
+    if (main.type() == type::k_document) {
+        document::view main_view = main.get_document().value;
+        for (auto&& el : pattern.get_document().value) {
+            if (main_view.find(el.key()) == main_view.end()) {
+                return false;
+            }
+            if (!matches(main_view[el.key()].get_value(), el.get_value())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    if (main.type() == type::k_array) {
+        array::view main_array = main.get_array().value;
+        array::view pattern_array = pattern.get_array().value;
+
+        if (main_array.length() < pattern_array.length()) {
+            return false;
+        }
+
+        auto main_iter = main_array.begin();
+        for (auto&& el : pattern_array) {
+            if (!matches((*main_iter).get_value(), el.get_value())) {
+                return false;
+            }
+            main_iter++;
+        }
+        return true;
+    }
+
+    return main == pattern;
+}
+
+bool matches(document::view doc, document::view pattern) {
+    return matches(types::value{types::b_document{doc}}, types::value{types::b_document{pattern}});
+}
 
 document::value run_insert_one_test(collection* coll, document::view operation) {
     document::view arguments = operation["arguments"].get_document().value;
@@ -61,7 +130,7 @@ std::map<std::string, std::function<document::value(collection*, document::view)
 
 class test_ctx {
    public:
-    test_ctx(bsoncxx::document::view test_specs_view, class client& client) : client(client) {
+    test_ctx(document::view test_specs_view, class client& client) : client(client) {
         db1_name = to_string(test_specs_view["database_name"].get_utf8().value);
         db2_name = to_string(test_specs_view["database2_name"].get_utf8().value);
         coll1_name = to_string(test_specs_view["collection_name"].get_utf8().value);
@@ -79,16 +148,16 @@ class test_ctx {
         client[db2_name][coll2_name].insert_one(make_document(), insert_opts);
     }
 
-    pipeline build_pipeline(bsoncxx::array::view pipeline_docs) {
+    pipeline build_pipeline(array::view pipeline_docs) {
         pipeline pipeline{};
 
         for (auto&& element : pipeline_docs) {
-            bsoncxx::document::view document = element.get_document();
+            document::view document = element.get_document();
 
             if (document["$match"]) {
                 pipeline.match(document["$match"].get_document().value);
             } else if (document["$out"]) {
-                pipeline.out(bsoncxx::string::to_string(document["$out"].get_utf8().value));
+                pipeline.out(string::to_string(document["$out"].get_utf8().value));
             } else if (document["$sort"]) {
                 pipeline.sort(document["$sort"].get_document().value);
             } else {
@@ -99,7 +168,7 @@ class test_ctx {
         return pipeline;
     }
 
-    change_stream make_change_stream(bsoncxx::document::view test_view) {
+    change_stream make_change_stream(document::view test_view) {
         auto target = std::string(test_view["target"].get_utf8().value);
 
         pipeline pipeline{};
@@ -117,7 +186,7 @@ class test_ctx {
         }
     }
 
-    void run_operations(bsoncxx::document::view test_view) {
+    void run_operations(document::view test_view) {
         /* run all operations in the test's "operations" field */
         if (test_view["operations"]) {
             auto test_operations = test_view["operations"].get_array().value;
@@ -142,21 +211,19 @@ class test_ctx {
     client& client;
 };
 
-void run_change_stream_tests_in_file(const std::string& test_path,
-                                     mongocxx::client& global_client) {
-    INFO("Test path: " << test_path);
+void run_change_stream_tests_in_file(const std::string& test_path, client& global_client) {
+    std::cout << "Test path: " << test_path << std::endl;
     auto test_specs = test_util::parse_test_file(test_path);
     REQUIRE(test_specs);
     auto test_specs_view = test_specs->view();
+
     std::string server_version = test_util::get_server_version(global_client);
-    auto coll = global_client["db"]["collection"];
-    auto cursor = coll.find({});
     test_ctx ctx{test_specs_view, global_client};
 
-    // this follows the sketch laid out in the change stream spec tests readme:
+    // This follows the sketch laid out in the change stream spec tests readme:
     // https://github.com/mongodb/specifications/tree/master/source/change-streams/tests#spec-test-runner
     for (auto&& test_el : test_specs_view["tests"].get_array().value) {
-        bsoncxx::document::view test_view = test_el.get_document().value;
+        auto test_view = test_el.get_document().value;
 
         std::cout << " test " << to_string(test_view["description"].get_utf8().value) << std::endl;
 
@@ -191,25 +258,65 @@ void run_change_stream_tests_in_file(const std::string& test_path,
                 }
             }
             if (!found) {
-                WARN("skipping - supported topologies are: " +
-                     bsoncxx::to_json(required_topologies));
+                WARN("skipping - supported topologies are: " + to_json(required_topologies));
+                continue;
             }
         }
 
         // TODO: begin monitoring all APM events.
         change_stream cs = ctx.make_change_stream(test_view);
         ctx.run_operations(test_view);
-
         std::vector<document::value> events;
-        for (auto&& event : cs) {
-            /* store a copy of the event. */
-            events.push_back(document::value(event));
-        }
 
-
+        auto expected_result = test_view["result"].get_document().value;
+        bool had_error = false;
+        try {
+            for (auto&& event : cs) {
+                /* store a copy of the event. */
+                events.emplace_back(document::value(event));
+            }
+        } catch (operation_exception& oe) {
+            REQUIRE(expected_result["error"]);
+            auto actual_error = oe.raw_server_error();
+            std::cout << oe.what() << std::endl;
+            std::cout << oe.code() << std::endl;
+            REQUIRE(actual_error);
+            REQUIRE(matches(actual_error->view(), expected_result["error"].get_document().value));
+            had_error = true;
+        };
 
         for (auto&& event : events) {
-            std::cout << bsoncxx::to_json(event) << std::endl;
+            std::cout << to_json(event) << std::endl;
+        }
+
+        if (!had_error) {
+            REQUIRE(expected_result["success"]);
+            for (auto&& expected_event : expected_result["success"].get_array().value) {
+                auto expected_event_view = expected_event.get_document().value;
+                bool found = false;
+
+                for (auto&& event : events) {
+                    std::cout << to_json(event) << std::endl;
+                    std::cout << "doing the comparison" << std::endl;
+                    if (matches(event.view(), expected_event_view)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                REQUIRE(found);
+
+                std::cout << "done";
+
+                //                REQUIRE (std::find_if(events.begin(), events.end(),
+                //                [&](document::value event) {
+                //                    std::cout << "comparing " << to_json (event.view()) <<
+                //                    std::endl;
+                //                    std::cout << "with      " << to_json (expected_event_view) <<
+                //                    std::endl;
+                //                   return matches(event.view(), expected_event_view);
+                //                }) != events.end());
+            }
         }
         // check_expectations ();
     }
@@ -217,9 +324,7 @@ void run_change_stream_tests_in_file(const std::string& test_path,
 
 TEST_CASE("Change stream spec tests", "[change_stream_spec]") {
     instance::current();
-
     client global_client{uri{}};
-
     char* change_stream_tests_path = std::getenv("CHANGE_STREAM_TESTS_PATH");
     if (!change_stream_tests_path) {
         FAIL("environment variable CHANGES_STREAM_TESTS_PATH not set");
@@ -232,9 +337,7 @@ TEST_CASE("Change stream spec tests", "[change_stream_spec]") {
 
     std::ifstream test_files{path + "/test_files.txt"};
     REQUIRE(test_files.good());
-
     std::string test_file;
-
     while (std::getline(test_files, test_file)) {
         run_change_stream_tests_in_file(path + "/" + test_file, global_client);
     }
