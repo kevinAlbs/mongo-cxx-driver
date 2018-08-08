@@ -27,6 +27,10 @@
 #include <bsoncxx/stdx/string_view.hpp>
 #include <mongocxx/stdx.hpp>
 
+#include <bsoncxx/types.hpp>
+#include <bsoncxx/types/value.hpp>
+#include <bsoncxx/document/view.hpp>
+
 #include <mongocxx/config/private/prelude.hh>
 
 namespace mongocxx {
@@ -36,6 +40,7 @@ class client;
 
 namespace test_util {
 
+using namespace bsoncxx;
 //
 // Compares to version number strings (i.e. positive integers separated by periods). Comparisons are
 // done to the lesser precision of the two versions. For example, 3.2 is considered equal to 3.2.11,
@@ -128,6 +133,10 @@ using xformer_t = std::function<stdx::optional<item_t>(item_t, bsoncxx::builder:
 // passed in.
 //
 bsoncxx::document::value transform_document(bsoncxx::document::view view, const xformer_t& fcn);
+double as_double(types::value value);
+bool is_numeric(types::value value);
+bool matches(types::value main, types::value pattern);
+bool matches(document::view doc, document::view pattern);
 
 }  // namespace test_util
 
