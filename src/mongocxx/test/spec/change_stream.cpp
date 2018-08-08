@@ -105,6 +105,26 @@ bool matches(document::view doc, document::view pattern) {
     return matches(types::value{types::b_document{doc}}, types::value{types::b_document{pattern}});
 }
 
+pipeline build_pipeline(array::view pipeline_docs) {
+    pipeline pipeline{};
+
+    for (auto&& element : pipeline_docs) {
+        document::view document = element.get_document();
+
+        if (document["$match"]) {
+            pipeline.match(document["$match"].get_document().value);
+        } else if (document["$out"]) {
+            pipeline.out(string::to_string(document["$out"].get_utf8().value));
+        } else if (document["$sort"]) {
+            pipeline.sort(document["$sort"].get_document().value);
+        } else {
+            REQUIRE(false);
+        }
+    }
+
+    return pipeline;
+}
+
 document::value run_insert_one_test(collection* coll, document::view operation) {
     document::view arguments = operation["arguments"].get_document().value;
     document::view document = arguments["document"].get_document().value;
@@ -137,46 +157,18 @@ class test_ctx {
         coll2_name = to_string(test_specs_view["collection2_name"].get_utf8().value);
         client[db1_name].drop();
         client[db2_name].drop();
-        /* create the collections by inserting. */
-        options::insert insert_opts;
-        write_concern wc;
-        wc.majority(std::chrono::milliseconds(30000));
-        insert_opts.write_concern(wc);
-
         using namespace bsoncxx::builder::basic;
-        client[db1_name][coll1_name].insert_one(make_document(), insert_opts);
-        client[db2_name][coll2_name].insert_one(make_document(), insert_opts);
-    }
-
-    pipeline build_pipeline(array::view pipeline_docs) {
-        pipeline pipeline{};
-
-        for (auto&& element : pipeline_docs) {
-            document::view document = element.get_document();
-
-            if (document["$match"]) {
-                pipeline.match(document["$match"].get_document().value);
-            } else if (document["$out"]) {
-                pipeline.out(string::to_string(document["$out"].get_utf8().value));
-            } else if (document["$sort"]) {
-                pipeline.sort(document["$sort"].get_document().value);
-            } else {
-                REQUIRE(false);
-            }
-        }
-
-        return pipeline;
+        client[db1_name][coll1_name].insert_one(make_document());
+        client[db2_name][coll2_name].insert_one(make_document());
     }
 
     change_stream make_change_stream(document::view test_view) {
-        auto target = std::string(test_view["target"].get_utf8().value);
-
         pipeline pipeline{};
-
         if (test_view["pipeline"]) {
             pipeline = build_pipeline(test_view["pipeline"].get_array().value);
         }
 
+        auto target = std::string(test_view["target"].get_utf8().value);
         if (target == "collection") {
             return client[db1_name][coll1_name].watch(pipeline);
         } else if (target == "database") {
@@ -197,26 +189,28 @@ class test_ctx {
                 auto collname = to_string(operation["collection"].get_utf8().value);
                 auto coll = client[dbname][collname];
                 if (crud_test_runners.find(operation_name) == crud_test_runners.end()) {
-                    std::cout << "unsupported operation" << std::endl;
+                    WARN ("unsupported operation: " << operation_name);
+                    REQUIRE (false);
                 }
                 crud_test_runners[operation_name](&coll, operation.get_document().value);
             }
         }
     }
 
+ private:
+  // TODO: rename to use _
     std::string db1_name;
     std::string db2_name;
     std::string coll1_name;
     std::string coll2_name;
-    client& client;
+    class client& client;
 };
 
 void run_change_stream_tests_in_file(const std::string& test_path, client& global_client) {
-    std::cout << "Test path: " << test_path << std::endl;
+    INFO("Test path: " << test_path);
     auto test_specs = test_util::parse_test_file(test_path);
     REQUIRE(test_specs);
     auto test_specs_view = test_specs->view();
-
     std::string server_version = test_util::get_server_version(global_client);
     test_ctx ctx{test_specs_view, global_client};
 
@@ -225,11 +219,10 @@ void run_change_stream_tests_in_file(const std::string& test_path, client& globa
     for (auto&& test_el : test_specs_view["tests"].get_array().value) {
         auto test_view = test_el.get_document().value;
 
-        std::cout << " test " << to_string(test_view["description"].get_utf8().value) << std::endl;
-
+        INFO("Test case " << to_string(test_view["description"].get_utf8().value));
         if (test_view["description"].get_utf8().value.compare(
                 "Change Stream should error when an invalid aggregation stage is passed in") == 0) {
-            WARN("skipping test with invalid pipeline stages. The C++ driver cannot test them.");
+            WARN("Skipping test with invalid pipeline stages. The C++ driver cannot test them.");
             continue;
         }
 
@@ -258,7 +251,7 @@ void run_change_stream_tests_in_file(const std::string& test_path, client& globa
                 }
             }
             if (!found) {
-                WARN("skipping - supported topologies are: " + to_json(required_topologies));
+                WARN("Skipping - supported topologies are: " + to_json(required_topologies));
                 continue;
             }
         }
@@ -266,59 +259,44 @@ void run_change_stream_tests_in_file(const std::string& test_path, client& globa
         // TODO: begin monitoring all APM events.
         change_stream cs = ctx.make_change_stream(test_view);
         ctx.run_operations(test_view);
-        std::vector<document::value> events;
+        std::vector<document::value> changes;
 
         auto expected_result = test_view["result"].get_document().value;
         bool had_error = false;
         try {
-            for (auto&& event : cs) {
+            for (auto&& change : cs) {
                 /* store a copy of the event. */
-                events.emplace_back(document::value(event));
+                changes.emplace_back(document::value(change));
             }
         } catch (operation_exception& oe) {
             REQUIRE(expected_result["error"]);
             auto actual_error = oe.raw_server_error();
-            std::cout << oe.what() << std::endl;
-            std::cout << oe.code() << std::endl;
             REQUIRE(actual_error);
             REQUIRE(matches(actual_error->view(), expected_result["error"].get_document().value));
             had_error = true;
         };
 
-        for (auto&& event : events) {
-            std::cout << to_json(event) << std::endl;
+        // TODO: remove
+        for (auto&& change : changes) {
+            std::cout << to_json(change) << std::endl;
         }
 
         if (!had_error) {
             REQUIRE(expected_result["success"]);
-            for (auto&& expected_event : expected_result["success"].get_array().value) {
-                auto expected_event_view = expected_event.get_document().value;
+            for (auto&& expected_change : expected_result["success"].get_array().value) {
+                auto expected_change_view = expected_change.get_document().value;
                 bool found = false;
 
-                for (auto&& event : events) {
-                    std::cout << to_json(event) << std::endl;
-                    std::cout << "doing the comparison" << std::endl;
-                    if (matches(event.view(), expected_event_view)) {
+                for (auto&& change : changes) {
+                    if (matches(change.view(), expected_change_view)) {
                         found = true;
                         break;
                     }
                 }
 
                 REQUIRE(found);
-
-                std::cout << "done";
-
-                //                REQUIRE (std::find_if(events.begin(), events.end(),
-                //                [&](document::value event) {
-                //                    std::cout << "comparing " << to_json (event.view()) <<
-                //                    std::endl;
-                //                    std::cout << "with      " << to_json (expected_event_view) <<
-                //                    std::endl;
-                //                   return matches(event.view(), expected_event_view);
-                //                }) != events.end());
             }
         }
-        // check_expectations ();
     }
 }
 
