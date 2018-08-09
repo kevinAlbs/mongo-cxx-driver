@@ -74,7 +74,8 @@ set(test_driver_sources
 )
 
 set(spec_test_common
-    spec/operation.cpp)
+    spec/operation.cpp
+    spec/monitoring.cpp)
 
 add_executable(test_driver
     ${CMAKE_SOURCE_DIR}/src/mongocxx/test_util/client_helpers.cpp

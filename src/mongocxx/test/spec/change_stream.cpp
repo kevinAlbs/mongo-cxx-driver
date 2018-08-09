@@ -33,6 +33,7 @@
 #include <mongocxx/test/spec/operation.hh>
 #include <mongocxx/test_util/client_helpers.hh>
 #include <mongocxx/uri.hpp>
+#include <mongocxx/test/spec/monitoring.hh>
 
 namespace {
 using namespace mongocxx;
@@ -43,16 +44,16 @@ using namespace test_util;
 
 class test_ctx {
    public:
-    test_ctx(document::view test_specs_view, class client& client) : client(client) {
+    test_ctx(document::view test_specs_view, class client& global_client, class client& client) : global_client(global_client), client(client) {
         db1_name = to_string(test_specs_view["database_name"].get_utf8().value);
         db2_name = to_string(test_specs_view["database2_name"].get_utf8().value);
         coll1_name = to_string(test_specs_view["collection_name"].get_utf8().value);
         coll2_name = to_string(test_specs_view["collection2_name"].get_utf8().value);
-        client[db1_name].drop();
-        client[db2_name].drop();
+        global_client[db1_name].drop();
+        global_client[db2_name].drop();
         using namespace bsoncxx::builder::basic;
-        client[db1_name][coll1_name].insert_one(make_document());
-        client[db2_name][coll2_name].insert_one(make_document());
+        global_client[db1_name][coll1_name].insert_one(make_document());
+        global_client[db2_name][coll2_name].insert_one(make_document());
     }
 
     change_stream make_change_stream(document::view test_view) {
@@ -80,7 +81,7 @@ class test_ctx {
                 std::cout << "running operation " << operation_name << std::endl;
                 auto dbname = to_string(operation["database"].get_utf8().value);
                 auto collname = to_string(operation["collection"].get_utf8().value);
-                auto coll = client[dbname][collname];
+                auto coll = global_client[dbname][collname];
                 get_test_runners()[operation_name](&coll, operation.get_document().value);
             }
         }
@@ -92,16 +93,23 @@ class test_ctx {
     std::string db2_name;
     std::string coll1_name;
     std::string coll2_name;
+    class client& global_client;
     class client& client;
 };
 
-void run_change_stream_tests_in_file(const std::string& test_path, client& global_client) {
+void run_change_stream_tests_in_file(const std::string& test_path) {
     INFO("Test path: " << test_path);
     auto test_specs = test_util::parse_test_file(test_path);
     REQUIRE(test_specs);
+    spec::apm_checker apm_checker;
+    options::client client_opts;
+    client_opts.apm_opts(apm_checker.get_apm_opts());
+
+    client global_client(uri{}), client(uri{}, client_opts);
+
     auto test_specs_view = test_specs->view();
     std::string server_version = test_util::get_server_version(global_client);
-    test_ctx ctx{test_specs_view, global_client};
+    test_ctx ctx{test_specs_view, global_client, client};
 
     // This follows the sketch laid out in the change stream spec tests readme:
     // https://github.com/mongodb/specifications/tree/master/source/change-streams/tests#spec-test-runner
@@ -145,7 +153,7 @@ void run_change_stream_tests_in_file(const std::string& test_path, client& globa
             }
         }
 
-        // TODO: begin monitoring all APM events.
+
         change_stream cs = ctx.make_change_stream(test_view);
         ctx.run_operations(test_view);
         std::vector<document::value> changes;
@@ -165,9 +173,8 @@ void run_change_stream_tests_in_file(const std::string& test_path, client& globa
             had_error = true;
         };
 
-        // TODO: remove
-        for (auto&& change : changes) {
-            std::cout << to_json(change) << std::endl;
+        if (test_view["expectations"]) {
+            apm_checker.compare(test_view["expectations"].get_array().value);
         }
 
         if (!had_error) {
@@ -191,7 +198,6 @@ void run_change_stream_tests_in_file(const std::string& test_path, client& globa
 
 TEST_CASE("Change stream spec tests", "[change_stream_spec]") {
     instance::current();
-    client global_client{uri{}};
     char* change_stream_tests_path = std::getenv("CHANGE_STREAM_TESTS_PATH");
     if (!change_stream_tests_path) {
         FAIL("environment variable CHANGES_STREAM_TESTS_PATH not set");
@@ -206,7 +212,7 @@ TEST_CASE("Change stream spec tests", "[change_stream_spec]") {
     REQUIRE(test_files.good());
     std::string test_file;
     while (std::getline(test_files, test_file)) {
-        run_change_stream_tests_in_file(path + "/" + test_file, global_client);
+        run_change_stream_tests_in_file(path + "/" + test_file);
     }
 }
 }  // namespace
