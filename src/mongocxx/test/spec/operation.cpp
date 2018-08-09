@@ -16,24 +16,20 @@
 
 #include <fstream>
 #include <functional>
-#include <map>
 #include <memory>
 #include <set>
 #include <sstream>
-#include <string>
 #include <vector>
 
 #include <bsoncxx/builder/basic/array.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/exception/exception.hpp>
+#include <mongocxx/exception/logic_error.hpp>
 #include <bsoncxx/json.hpp>
 #include <bsoncxx/string/to_string.hpp>
 #include <bsoncxx/test_util/catch.hh>
-#include <mongocxx/client.hpp>
 #include <mongocxx/collection.hpp>
 #include <mongocxx/cursor.hpp>
-#include <mongocxx/database.hpp>
-#include <mongocxx/instance.hpp>
 #include <mongocxx/options/aggregate.hpp>
 #include <mongocxx/options/count.hpp>
 #include <mongocxx/options/delete.hpp>
@@ -52,7 +48,6 @@
 #include <mongocxx/test_util/client_helpers.hh>
 
 #include <mongocxx/config/private/prelude.hh>
-#include <mongocxx/exception/logic_error.hpp>
 
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN

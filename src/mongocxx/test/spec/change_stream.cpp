@@ -22,7 +22,6 @@
 #include <bsoncxx/document/view.hpp>
 #include <bsoncxx/json.hpp>
 #include <bsoncxx/stdx/optional.hpp>
-#include <bsoncxx/stdx/optional.hpp>
 #include <bsoncxx/stdx/string_view.hpp>
 #include <bsoncxx/string/to_string.hpp>
 #include <bsoncxx/test_util/catch.hh>
@@ -120,9 +119,7 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
         pipeline pipeline{};
         auto cs = [&]() {
             if (test["changeStreamPipeline"]) {
-                std::cout << "building pipeline" << std::endl;
                 pipeline = build_pipeline(test["changeStreamPipeline"].get_array().value);
-                std::cout << "pipeline:    " << to_json(pipeline.view_array());
             }
             auto target = std::string(test["target"].get_utf8().value);
             if (target == "collection") {

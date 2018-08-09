@@ -16,12 +16,11 @@
 #include <iostream>
 
 #include <bsoncxx/builder/basic/document.hpp>
-#include <mongocxx/events/command_started_event.hpp>
 #include <mongocxx/test/spec/monitoring.hh>
 #include <mongocxx/test_util/client_helpers.hh>
+#include <third_party/catch/include/catch.hpp>
 
 #include <mongocxx/config/private/prelude.hh>
-#include <third_party/catch/include/catch.hpp>
 
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
@@ -33,10 +32,6 @@ void apm_checker::compare(bsoncxx::array::view expectations) {
     auto events_iter = _events.begin();
     for (auto expectation : expectations) {
         REQUIRE(events_iter != _events.end());
-        std::cout << "pattern   " << bsoncxx::to_json(expectation.get_document().view())
-                  << std::endl;
-        std::cout << "document  " << bsoncxx::to_json(*events_iter) << std::endl;
-
         REQUIRE(test_util::matches(*events_iter, expectation.get_document().view()));
         events_iter++;
     }
