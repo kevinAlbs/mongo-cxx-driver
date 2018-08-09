@@ -29,7 +29,6 @@ namespace spec {
 using namespace mongocxx;
 
 void apm_checker::compare(bsoncxx::array::view expectations) {
-    std::cout << "here" << std::endl;
     (void) expectations;
     for (auto&& evt : _events) {
         std::cout << "event " << bsoncxx::to_json(evt) << std::endl;

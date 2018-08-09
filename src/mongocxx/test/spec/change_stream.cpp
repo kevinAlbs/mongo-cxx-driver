@@ -42,103 +42,31 @@ using namespace bsoncxx::string;
 using namespace spec;
 using namespace test_util;
 
-class test_ctx {
-   public:
-    test_ctx(document::view test_specs_view, class client& global_client, class client& client) : global_client(global_client), client(client) {
-        db1_name = to_string(test_specs_view["database_name"].get_utf8().value);
-        db2_name = to_string(test_specs_view["database2_name"].get_utf8().value);
-        coll1_name = to_string(test_specs_view["collection_name"].get_utf8().value);
-        coll2_name = to_string(test_specs_view["collection2_name"].get_utf8().value);
-        global_client[db1_name].drop();
-        global_client[db2_name].drop();
-        using namespace bsoncxx::builder::basic;
-        global_client[db1_name][coll1_name].insert_one(make_document());
-        global_client[db2_name][coll2_name].insert_one(make_document());
-    }
-
-    change_stream make_change_stream(document::view test_view) {
-        pipeline pipeline{};
-        if (test_view["pipeline"]) {
-            pipeline = build_pipeline(test_view["pipeline"].get_array().value);
-        }
-
-        auto target = std::string(test_view["target"].get_utf8().value);
-        if (target == "collection") {
-            return client[db1_name][coll1_name].watch(pipeline);
-        } else if (target == "database") {
-            return client[db1_name].watch(pipeline);
-        } else {
-            return client.watch(pipeline);
-        }
-    }
-
-    void run_operations(document::view test_view) {
-        /* run all operations in the test's "operations" field */
-        if (test_view["operations"]) {
-            auto test_operations = test_view["operations"].get_array().value;
-            for (auto&& operation : test_operations) {
-                std::string operation_name = to_string(operation["name"].get_utf8().value);
-                std::cout << "running operation " << operation_name << std::endl;
-                auto dbname = to_string(operation["database"].get_utf8().value);
-                auto collname = to_string(operation["collection"].get_utf8().value);
-                auto coll = global_client[dbname][collname];
-                get_test_runners()[operation_name](&coll, operation.get_document().value);
-            }
-        }
-    }
-
-   private:
-    // TODO: rename to use _
-    std::string db1_name;
-    std::string db2_name;
-    std::string coll1_name;
-    std::string coll2_name;
-    class client& global_client;
-    class client& client;
-};
-
 void run_change_stream_tests_in_file(const std::string& test_path) {
+
     INFO("Test path: " << test_path);
-    auto test_specs = test_util::parse_test_file(test_path);
-    REQUIRE(test_specs);
-    spec::apm_checker apm_checker;
-    options::client client_opts;
-    client_opts.apm_opts(apm_checker.get_apm_opts());
+    auto test_spec_value = test_util::parse_test_file(test_path);
+    REQUIRE(test_spec_value);
+    auto test_spec = test_spec_value->view();
 
-    client global_client(uri{}), client(uri{}, client_opts);
-
-    auto test_specs_view = test_specs->view();
+    client global_client(uri{});
     std::string server_version = test_util::get_server_version(global_client);
-    test_ctx ctx{test_specs_view, global_client, client};
+
+    std::string db1_name = to_string(test_spec["database_name"].get_utf8().value);
+    std::string db2_name = to_string(test_spec["database2_name"].get_utf8().value);
+    std::string coll1_name = to_string(test_spec["collection_name"].get_utf8().value);
+    std::string coll2_name = to_string(test_spec["collection2_name"].get_utf8().value);
+    auto tests = test_spec["tests"].get_array().value;
+
 
     // This follows the sketch laid out in the change stream spec tests readme:
     // https://github.com/mongodb/specifications/tree/master/source/change-streams/tests#spec-test-runner
-    for (auto&& test_el : test_specs_view["tests"].get_array().value) {
-        auto test_view = test_el.get_document().value;
+    for (auto&& test_el : tests) {
+        auto test = test_el.get_document().value;
 
-        INFO("Test case " << to_string(test_view["description"].get_utf8().value));
-        if (test_view["description"].get_utf8().value.compare(
-                "Change Stream should error when an invalid aggregation stage is passed in") == 0) {
-            WARN("Skipping test with invalid pipeline stages. The C++ driver cannot test them.");
-            continue;
-        }
-
-        if (test_view["minServerVersion"]) {
-            auto min_server_version = to_string(test_view["minServerVersion"].get_utf8().value);
-            if (test_util::compare_versions(server_version, min_server_version) < 0) {
-                return;
-            }
-        }
-
-        if (test_view["maxServerVersion"]) {
-            auto max_server_version = to_string(test_view["maxServerVersion"].get_utf8().value);
-            if (test_util::compare_versions(server_version, max_server_version) > 0) {
-                return;
-            }
-        }
-
-        if (test_view["topology"]) {
-            auto required_topologies = test_view["topology"].get_array().value;
+        // "If topology does not include the topology of the server instance(s), skip this test."
+        if (test["topology"]) {
+            auto required_topologies = test["topology"].get_array().value;
             auto topology = test_util::get_topology(global_client);
             bool found = false;
             for (auto&& el : required_topologies) {
@@ -153,13 +81,75 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
             }
         }
 
+        if (test["minServerVersion"]) {
+            auto min_server_version = to_string(test["minServerVersion"].get_utf8().value);
+            if (test_util::compare_versions(server_version, min_server_version) < 0) {
+                return;
+            }
+        }
 
-        change_stream cs = ctx.make_change_stream(test_view);
-        ctx.run_operations(test_view);
-        std::vector<document::value> changes;
+        if (test["maxServerVersion"]) {
+            auto max_server_version = to_string(test["maxServerVersion"].get_utf8().value);
+            if (test_util::compare_versions(server_version, max_server_version) > 0) {
+                return;
+            }
+        }
 
-        auto expected_result = test_view["result"].get_document().value;
+        // "Use globalClient to [drop and recreate the collections]".
+        global_client[db1_name].drop();
+        global_client[db2_name].drop();
+        {
+            using namespace bsoncxx::builder::basic;
+            global_client[db1_name][coll1_name].insert_one(make_document());
+            global_client[db2_name][coll2_name].insert_one(make_document());
+        }
+
+        // "Create a new MongoClient `client`"
+        spec::apm_checker apm_checker;
+        options::client client_opts;
+        // "Begin monitoring all APM events for `client`"
+        client_opts.apm_opts(apm_checker.get_apm_opts());
+        class client client(uri{}, client_opts);
+
+        INFO("Test case " << to_string(test["description"].get_utf8().value));
+        if (test["description"].get_utf8().value.compare(
+                "Change Stream should error when an invalid aggregation stage is passed in") == 0) {
+            WARN("Skipping test with invalid pipeline stages. The C++ driver cannot test them.");
+            continue;
+        }
+
+        // "Using client, create a changeStream changeStream against the specified target"
+        pipeline pipeline{};
+        auto cs = [&] () {
+            if (test["pipeline"]) {
+                pipeline = build_pipeline(test["pipeline"].get_array().value);
+            }
+            auto target = std::string(test["target"].get_utf8().value);
+            if (target == "collection") {
+                return client[db1_name][coll1_name].watch(pipeline);
+            } else if (target == "database") {
+                return client[db1_name].watch(pipeline);
+            } else {
+                return client.watch(pipeline);
+            }
+        }();
+
+        // "Using `globalClient`, run every operation in operations in serial against the server."
+        if (test["operations"]) {
+            for (auto&& operation : test["operations"].get_array().value) {
+                std::string operation_name = to_string(operation["name"].get_utf8().value);
+                std::cout << "running operation " << operation_name << std::endl; // TODO: remove
+                auto dbname = to_string(operation["database"].get_utf8().value);
+                auto collname = to_string(operation["collection"].get_utf8().value);
+                auto coll = global_client[dbname][collname];
+                get_test_runners()[operation_name](&coll, operation.get_document().value);
+            }
+        }
+
+        // "Wait until either: (1) An error occurs (2) All operations have been successful"
         bool had_error = false;
+        auto expected_result = test["result"].get_document().value;
+        std::vector<document::value> changes;
         try {
             for (auto&& change : cs) {
                 /* store a copy of the event. */
@@ -169,14 +159,12 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
             REQUIRE(expected_result["error"]);
             auto actual_error = oe.raw_server_error();
             REQUIRE(actual_error);
+            // "Assert that the error MATCHES results.error"
             REQUIRE(matches(actual_error->view(), expected_result["error"].get_document().value));
             had_error = true;
         };
 
-        if (test_view["expectations"]) {
-            apm_checker.compare(test_view["expectations"].get_array().value);
-        }
-
+        // "Assert that the changes received from changeStream MATCH the results in results.success"
         if (!had_error) {
             REQUIRE(expected_result["success"]);
             for (auto&& expected_change : expected_result["success"].get_array().value) {
@@ -192,6 +180,11 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
 
                 REQUIRE(found);
             }
+        }
+
+        // Match captured APM events.
+        if (test["expectations"]) {
+            apm_checker.compare(test["expectations"].get_array().value);
         }
     }
 }
