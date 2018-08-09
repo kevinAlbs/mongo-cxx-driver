@@ -30,10 +30,10 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
 #include <mongocxx/instance.hpp>
+#include <mongocxx/test/spec/monitoring.hh>
 #include <mongocxx/test/spec/operation.hh>
 #include <mongocxx/test_util/client_helpers.hh>
 #include <mongocxx/uri.hpp>
-#include <mongocxx/test/spec/monitoring.hh>
 
 namespace {
 using namespace mongocxx;
@@ -43,7 +43,6 @@ using namespace spec;
 using namespace test_util;
 
 void run_change_stream_tests_in_file(const std::string& test_path) {
-
     INFO("Test path: " << test_path);
     auto test_spec_value = test_util::parse_test_file(test_path);
     REQUIRE(test_spec_value);
@@ -57,7 +56,6 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
     std::string coll1_name = to_string(test_spec["collection_name"].get_utf8().value);
     std::string coll2_name = to_string(test_spec["collection2_name"].get_utf8().value);
     auto tests = test_spec["tests"].get_array().value;
-
 
     // This follows the sketch laid out in the change stream spec tests readme:
     // https://github.com/mongodb/specifications/tree/master/source/change-streams/tests#spec-test-runner
@@ -120,9 +118,11 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
 
         // "Using client, create a changeStream changeStream against the specified target"
         pipeline pipeline{};
-        auto cs = [&] () {
-            if (test["pipeline"]) {
-                pipeline = build_pipeline(test["pipeline"].get_array().value);
+        auto cs = [&]() {
+            if (test["changeStreamPipeline"]) {
+                std::cout << "building pipeline" << std::endl;
+                pipeline = build_pipeline(test["changeStreamPipeline"].get_array().value);
+                std::cout << "pipeline:    " << to_json(pipeline.view_array());
             }
             auto target = std::string(test["target"].get_utf8().value);
             if (target == "collection") {
@@ -138,7 +138,6 @@ void run_change_stream_tests_in_file(const std::string& test_path) {
         if (test["operations"]) {
             for (auto&& operation : test["operations"].get_array().value) {
                 std::string operation_name = to_string(operation["name"].get_utf8().value);
-                std::cout << "running operation " << operation_name << std::endl; // TODO: remove
                 auto dbname = to_string(operation["database"].get_utf8().value);
                 auto collname = to_string(operation["collection"].get_utf8().value);
                 auto coll = global_client[dbname][collname];

@@ -23,12 +23,13 @@ namespace spec {
 
 using namespace mongocxx;
 
-// TODO: think of a better name please.
+// Stores and compares apm events.
 class apm_checker {
- public:
+   public:
     options::apm get_apm_opts();
-    void compare (bsoncxx::array::view expected);
- private:
+    void compare(bsoncxx::array::view expected);
+
+   private:
     std::vector<bsoncxx::document::value> _events;
 };
 

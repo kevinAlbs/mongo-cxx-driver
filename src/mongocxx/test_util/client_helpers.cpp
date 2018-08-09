@@ -250,12 +250,13 @@ double as_double(bsoncxx::types::value value) {
         return static_cast<double>(value.get_double());
     }
 
-    throw std::logic_error{"could not convert type " + bsoncxx::to_string(value.type()) + " to double"};
+    throw std::logic_error{"could not convert type " + bsoncxx::to_string(value.type()) +
+                           " to double"};
 }
 
 bool is_numeric(types::value value) {
     return value.type() == type::k_int32 || value.type() == type::k_int64 ||
-        value.type() == type::k_double;
+           value.type() == type::k_double;
 }
 
 bool matches(types::value main, types::value pattern) {

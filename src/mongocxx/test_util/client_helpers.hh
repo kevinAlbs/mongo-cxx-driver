@@ -27,9 +27,9 @@
 #include <bsoncxx/stdx/string_view.hpp>
 #include <mongocxx/stdx.hpp>
 
+#include <bsoncxx/document/view.hpp>
 #include <bsoncxx/types.hpp>
 #include <bsoncxx/types/value.hpp>
-#include <bsoncxx/document/view.hpp>
 
 #include <mongocxx/config/private/prelude.hh>
 
