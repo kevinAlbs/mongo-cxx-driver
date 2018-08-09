@@ -322,6 +322,7 @@ tasks:
       commands:
         - func: "setup"
         - func: "start_mongod"
+          vars:
               TOPOLOGY: "replica_set"
         - func: "install_c_driver"
           vars:
