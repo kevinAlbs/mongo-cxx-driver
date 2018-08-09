@@ -36,6 +36,7 @@ MONGOCXX_INLINE_NAMESPACE_BEGIN
 
 class client;
 
+
 namespace test_util {
 //
 // Compares to version number strings (i.e. positive integers separated by periods). Comparisons are

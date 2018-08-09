@@ -202,9 +202,6 @@ bool is_replica_set(const client& client) {
     return static_cast<bool>(reply.view()["setName"]);
 }
 
-///
-/// Determines if the server is a part of a sharded cluster.
-///
 std::string get_topology(const client& client) {
     auto reply = client["admin"].run_command(make_document(kvp("isMaster", 1)));
     if (reply.view()["setName"]) {
