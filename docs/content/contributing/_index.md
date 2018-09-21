@@ -1,12 +1,11 @@
 +++
 date = "2016-08-15T16:11:58+05:30"
 title = "Contribution Guidelines"
+slug = "/contributing"
 [menu.main]
   weight = 0
   parent="contributing"
 +++
-
-## Contribution Guidelines
 
 ### Commit Messages
 
