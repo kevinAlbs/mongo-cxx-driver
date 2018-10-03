@@ -9,7 +9,7 @@ title = "Installing the mongocxx driver"
 ## Prerequisites
 
 - Any standard Unix platform, or Windows 7 SP1+
-- A compiler that suports C++11 (gcc, clang, or Visual Studio)
+- A compiler that supports C++11 (gcc, clang, or Visual Studio)
 - CMake 3.2 or later
 - boost headers (optional)
 
@@ -35,10 +35,11 @@ have problems, please file a bug report via
 
 The mongocxx driver builds on top of the MongoDB C driver.
 
+* For mongocxx-3.4.x, libmongoc 1.13.0 or later is required.
 * For mongocxx-3.3.x, libmongoc 1.10.1 or later is required.
 * For mongocxx-3.2.x, libmongoc 1.9.2 or later is required.
-* For mongocxx-3.1.[0-3], libmongoc 1.5.0 or later is required.
 * For mongocxx-3.1.4+, libmongoc 1.7.0 or later is required.
+* For mongocxx-3.1.[0-3], libmongoc 1.5.0 or later is required.
 * For mongocxx-3.0.x, we recommend the last 1.4.x version of libmongoc
 
 Unless you know that your package manager offers a high-enough version, you
@@ -96,20 +97,19 @@ recent stable release. For example, to work from a shallow checkout of the
 stable release branch:
 
 ```sh
-git clone https://github.com/mongodb/mongo-cxx-driver.git \
-    --branch releases/stable --depth 1
+git clone https://github.com/mongodb/mongo-cxx-driver.git --branch releases/stable
 cd mongo-cxx-driver/build
 ```
 
 If you prefer to download a tarball, look on the [mongocxx
 releases](https://github.com/mongodb/mongo-cxx-driver/releases) page for a
 link to the release tarball for the version you wish you install.  For
-example, to download version 3.3.1:
+example, to download version 3.4.0:
 
 ```sh
-curl -OL https://github.com/mongodb/mongo-cxx-driver/archive/r3.3.1.tar.gz
-tar -xzf r3.3.1.tar.gz
-cd mongo-cxx-driver-r3.3.1/build
+curl -OL https://github.com/mongodb/mongo-cxx-driver/archive/r3.4.0.tar.gz
+tar -xzf r3.4.0.tar.gz
+cd mongo-cxx-driver-r3.4.0/build
 ```
 
 Make sure you change to the `build` directory of whatever source tree you
