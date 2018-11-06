@@ -72,7 +72,7 @@ case "$OS" in
     cygwin*)
     # TODO: temp - just check that this works before refactoring config.
         /cygdrive/c/cmake/bin/cmake -G "Visual Studio 15 2017 Win64" $CMAKE_ARGS .
-        "/cygdrive/c/Program Files (x86)/MSBuild/15.0/Bin/MSBuild.exe" /m INSTALL.vcxproj
+        "/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/MSBuild.exe" /m INSTALL.vcxproj
         ;;
 
     *)
