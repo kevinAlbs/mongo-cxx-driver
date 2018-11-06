@@ -16,7 +16,7 @@ variables:
         linux_extra_path: &linux_extra_path /opt/cmake/bin
         macos_extra_path: &macos_extra_path /Applications/Cmake.app/Contents/bin
         msvc2015_extra_path: &msvc2015_extra_path "/cygdrive/c/cmake/bin:/cygdrive/c/Program Files (x86)/MSBuild/14.0/Bin"
-        msvc2017_extra_path: &msvc2017_extra_path "/cygdrive/c/cmake/bin:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
+        msvc2017_extra_path: &msvc2017_extra_path "/cygdrive/c/cmake/bin:/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Professional/MSBuild/15.0/Bin"
 
     ## tar options variables
     tar_options:
