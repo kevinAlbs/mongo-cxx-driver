@@ -40,6 +40,7 @@ else
     tar --extract --file $LIB.tgz
 fi
 
+# TODO: exporting path from evergreen, no need to find cmake again. OR add the find cmake script.
 if [ -f "/Applications/cmake-3.2.2-Darwin-x86_64/CMake.app/Contents/bin/cmake" ]; then
     CMAKE="/Applications/cmake-3.2.2-Darwin-x86_64/CMake.app/Contents/bin/cmake"
 elif [ -f "/Applications/Cmake.app/Contents/bin/cmake" ]; then
@@ -69,8 +70,9 @@ case "$OS" in
         ;;
 
     cygwin*)
-        /cygdrive/c/cmake/bin/cmake -G "Visual Studio 14 2015 Win64" $CMAKE_ARGS .
-        "/cygdrive/c/Program Files (x86)/MSBuild/14.0/Bin/MSBuild.exe" /m INSTALL.vcxproj
+    # TODO: temp - just check that this works before refactoring config.
+        /cygdrive/c/cmake/bin/cmake -G "Visual Studio 15 2017 Win64" $CMAKE_ARGS .
+        "/cygdrive/c/Program Files (x86)/MSBuild/15.0/Bin/MSBuild.exe" /m INSTALL.vcxproj
         ;;
 
     *)

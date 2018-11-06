@@ -150,6 +150,7 @@ functions:
             shell: bash
             working_dir: "mongo-cxx-driver"
             script: |
+                    export PATH="${extra_path}:$PATH"
                     set -o errexit
                     set -o xtrace
                     set -o pipefail
