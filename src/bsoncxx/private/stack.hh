@@ -89,7 +89,11 @@ class stack {
     }
 
    private:
-    typename std::aligned_storage<sizeof(T), alignof(T)>::type _object_memory[size];
+    using MemoryType = typename std::aligned_storage<
+        sizeof(T),
+        alignof(T) < alignof(std::max_align_t) ? alignof(T) : alignof(std::max_align_t)>::type;
+
+    MemoryType _object_memory[size];
 
     std::list<T*> _buckets;
 
