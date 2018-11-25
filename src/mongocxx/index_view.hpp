@@ -31,8 +31,8 @@ MONGOCXX_INLINE_NAMESPACE_BEGIN
 
 class MONGOCXX_API index_view {
    public:
-    index_view(index_view&&) noexcept;
-    index_view& operator=(index_view&&) noexcept;
+    index_view(index_view&&) ;
+    index_view& operator=(index_view&&) ;
 
     ~index_view();
 

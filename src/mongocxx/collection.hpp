@@ -90,17 +90,17 @@ class MONGOCXX_API collection {
     /// valid actions to take with a default constructed collection
     /// are to assign to it, or destroy it.
     ///
-    collection() noexcept;
+    collection() ;
 
     ///
     /// Move constructs a collection.
     ///
-    collection(collection&&) noexcept;
+    collection(collection&&) ;
 
     ///
     /// Move assigns a collection.
     ///
-    collection& operator=(collection&&) noexcept;
+    collection& operator=(collection&&) ;
 
     ///
     /// Copy constructs a collection.
@@ -121,7 +121,7 @@ class MONGOCXX_API collection {
     /// Returns true if the collection is valid, meaning it was not
     /// default constructed or moved from.
     ///
-    explicit operator bool() const noexcept;
+    explicit operator bool() const ;
 
     ///
     /// @{

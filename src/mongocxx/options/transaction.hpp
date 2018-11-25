@@ -51,17 +51,17 @@ class MONGOCXX_API transaction {
     ///
     /// Move constructs transaction options.
     ///
-    transaction(transaction&&) noexcept;
+    transaction(transaction&&) ;
 
     ///
     /// Move assigns transaction options.
     ///
-    transaction& operator=(transaction&&) noexcept;
+    transaction& operator=(transaction&&) ;
 
     ///
     /// Destroys the transaction options.
     ///
-    ~transaction() noexcept;
+    ~transaction() ;
 
     ///
     /// Sets the transaction read concern.

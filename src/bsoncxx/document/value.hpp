@@ -73,20 +73,20 @@ class BSONCXX_API value {
     value(const value&);
     value& operator=(const value&);
 
-    value(value&&) noexcept = default;
-    value& operator=(value&&) noexcept = default;
+    value(value&&)  = default;
+    value& operator=(value&&)  = default;
 
     ///
     /// Get a view over the document owned by this value.
     ///
-    BSONCXX_INLINE document::view view() const noexcept;
+    BSONCXX_INLINE document::view view() const ;
 
     ///
     /// Conversion operator that provides a view given a value.
     ///
     /// @return A view over the value.
     ///
-    BSONCXX_INLINE operator document::view() const noexcept;
+    BSONCXX_INLINE operator document::view() const ;
 
     ///
     /// Transfer ownership of the underlying buffer to the caller.
@@ -104,11 +104,11 @@ class BSONCXX_API value {
     std::size_t _length{0};
 };
 
-BSONCXX_INLINE document::view value::view() const noexcept {
+BSONCXX_INLINE document::view value::view() const  {
     return document::view{static_cast<uint8_t*>(_data.get()), _length};
 }
 
-BSONCXX_INLINE value::operator document::view() const noexcept {
+BSONCXX_INLINE value::operator document::view() const  {
     return view();
 }
 

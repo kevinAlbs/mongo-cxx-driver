@@ -44,17 +44,17 @@ class MONGOCXX_API uploader {
     /// from uploader. The only valid actions to take with a default constructed uploader are to
     /// assign to it, or destroy it.
     ///
-    uploader() noexcept;
+    uploader() ;
 
     ///
     /// Move constructs an uploader.
     ///
-    uploader(uploader&&) noexcept;
+    uploader(uploader&&) ;
 
     ///
     /// Move assigns an uploader.
     ///
-    uploader& operator=(uploader&&) noexcept;
+    uploader& operator=(uploader&&) ;
 
     uploader(const uploader&) = delete;
 
@@ -68,7 +68,7 @@ class MONGOCXX_API uploader {
     ///
     /// Returns true if the uploader is valid, meaning it was not default constructed or moved from.
     ///
-    explicit operator bool() const noexcept;
+    explicit operator bool() const ;
 
     ///
     /// Writes a specified number of bytes to a GridFS file.

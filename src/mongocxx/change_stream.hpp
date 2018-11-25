@@ -35,12 +35,12 @@ class MONGOCXX_API change_stream {
     ///
     /// Move constructs a change_stream.
     ///
-    change_stream(change_stream&& other) noexcept;
+    change_stream(change_stream&& other) ;
 
     ///
     /// Move assigns a change_stream.
     ///
-    change_stream& operator=(change_stream&& other) noexcept;
+    change_stream& operator=(change_stream&& other) ;
 
     ///
     /// Destroys a change_stream.
@@ -155,10 +155,10 @@ class MONGOCXX_API change_stream::iterator {
     /// @relates iterator
     ///
     friend MONGOCXX_API bool MONGOCXX_CALL operator==(const change_stream::iterator&,
-                                                      const change_stream::iterator&) noexcept;
+                                                      const change_stream::iterator&) ;
 
     friend MONGOCXX_API bool MONGOCXX_CALL operator!=(const change_stream::iterator&,
-                                                      const change_stream::iterator&) noexcept;
+                                                      const change_stream::iterator&) ;
     ///
     /// @}
     ///

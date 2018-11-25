@@ -42,12 +42,12 @@ class MONGOCXX_API cursor {
     ///
     /// Move constructs a cursor.
     ///
-    cursor(cursor&&) noexcept;
+    cursor(cursor&&) ;
 
     ///
     /// Move assigns a cursor.
     ///
-    cursor& operator=(cursor&&) noexcept;
+    cursor& operator=(cursor&&) ;
 
     ///
     /// Destroys a cursor.

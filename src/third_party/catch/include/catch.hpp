@@ -272,7 +272,7 @@ namespace Catch {
     struct SourceLineInfo {
 
         SourceLineInfo() = delete;
-        SourceLineInfo( char const* _file, std::size_t _line ) noexcept
+        SourceLineInfo( char const* _file, std::size_t _line )
         :   file( _file ),
             line( _line )
         {}
@@ -282,9 +282,9 @@ namespace Catch {
         SourceLineInfo& operator = ( SourceLineInfo const& ) = default;
         SourceLineInfo& operator = ( SourceLineInfo && )     = default;
 
-        bool empty() const noexcept;
-        bool operator == ( SourceLineInfo const& other ) const noexcept;
-        bool operator < ( SourceLineInfo const& other ) const noexcept;
+        bool empty() const ;
+        bool operator == ( SourceLineInfo const& other ) const ;
+        bool operator < ( SourceLineInfo const& other ) const ;
 
         char const* file;
         std::size_t line;
@@ -391,16 +391,16 @@ namespace Catch {
         static constexpr char const* const s_empty = "";
 
     public: // construction/ assignment
-        StringRef() noexcept
+        StringRef()
         :   StringRef( s_empty, 0 )
         {}
 
-        StringRef( StringRef const& other ) noexcept
+        StringRef( StringRef const& other )
         :   m_start( other.m_start ),
             m_size( other.m_size )
         {}
 
-        StringRef( StringRef&& other ) noexcept
+        StringRef( StringRef&& other )
         :   m_start( other.m_start ),
             m_size( other.m_size ),
             m_data( other.m_data )
@@ -408,23 +408,23 @@ namespace Catch {
             other.m_data = nullptr;
         }
 
-        StringRef( char const* rawChars ) noexcept;
+        StringRef( char const* rawChars ) ;
 
-        StringRef( char const* rawChars, size_type size ) noexcept
+        StringRef( char const* rawChars, size_type size )
         :   m_start( rawChars ),
             m_size( size )
         {}
 
-        StringRef( std::string const& stdString ) noexcept
+        StringRef( std::string const& stdString )
         :   m_start( stdString.c_str() ),
             m_size( stdString.size() )
         {}
 
-        ~StringRef() noexcept {
+        ~StringRef()  {
             delete[] m_data;
         }
 
-        auto operator = ( StringRef const &other ) noexcept -> StringRef& {
+        auto operator = ( StringRef const &other )  -> StringRef& {
             delete[] m_data;
             m_data = nullptr;
             m_start = other.m_start;
@@ -434,35 +434,35 @@ namespace Catch {
 
         operator std::string() const;
 
-        void swap( StringRef& other ) noexcept;
+        void swap( StringRef& other ) ;
 
     public: // operators
-        auto operator == ( StringRef const& other ) const noexcept -> bool;
-        auto operator != ( StringRef const& other ) const noexcept -> bool;
+        auto operator == ( StringRef const& other ) const  -> bool;
+        auto operator != ( StringRef const& other ) const  -> bool;
 
-        auto operator[] ( size_type index ) const noexcept -> char;
+        auto operator[] ( size_type index ) const  -> char;
 
     public: // named queries
-        auto empty() const noexcept -> bool {
+        auto empty() const  -> bool {
             return m_size == 0;
         }
-        auto size() const noexcept -> size_type {
+        auto size() const  -> size_type {
             return m_size;
         }
 
-        auto numberOfCharacters() const noexcept -> size_type;
+        auto numberOfCharacters() const  -> size_type;
         auto c_str() const -> char const*;
 
     public: // substrings and searches
-        auto substr( size_type start, size_type size ) const noexcept -> StringRef;
+        auto substr( size_type start, size_type size ) const  -> StringRef;
 
         // Returns the current start pointer.
         // Note that the pointer can change when if the StringRef is a substring
-        auto currentData() const noexcept -> char const*;
+        auto currentData() const  -> char const*;
 
     private: // ownership queries - may not be consistent between calls
-        auto isOwned() const noexcept -> bool;
-        auto isSubstring() const noexcept -> bool;
+        auto isOwned() const  -> bool;
+        auto isSubstring() const  -> bool;
     };
 
     auto operator + ( StringRef const& lhs, StringRef const& rhs ) -> std::string;
@@ -472,7 +472,7 @@ namespace Catch {
     auto operator += ( std::string& lhs, StringRef const& sr ) -> std::string&;
     auto operator << ( std::ostream& os, StringRef const& sr ) -> std::ostream&;
 
-    inline auto operator "" _sr( char const* rawChars, std::size_t size ) noexcept -> StringRef {
+    inline auto operator "" _sr( char const* rawChars, std::size_t size )  -> StringRef {
         return StringRef( rawChars, size );
     }
 
@@ -485,7 +485,7 @@ template<typename C>
 class TestInvokerAsMethod : public ITestInvoker {
     void (C::*m_testAsMethod)();
 public:
-    TestInvokerAsMethod( void (C::*testAsMethod)() ) noexcept : m_testAsMethod( testAsMethod ) {}
+    TestInvokerAsMethod( void (C::*testAsMethod)() )  : m_testAsMethod( testAsMethod ) {}
 
     void invoke() const override {
         C obj;
@@ -493,21 +493,21 @@ public:
     }
 };
 
-auto makeTestInvoker( void(*testAsFunction)() ) noexcept -> ITestInvoker*;
+auto makeTestInvoker( void(*testAsFunction)() )  -> ITestInvoker*;
 
 template<typename C>
-auto makeTestInvoker( void (C::*testAsMethod)() ) noexcept -> ITestInvoker* {
+auto makeTestInvoker( void (C::*testAsMethod)() )  -> ITestInvoker* {
     return new(std::nothrow) TestInvokerAsMethod<C>( testAsMethod );
 }
 
 struct NameAndTags {
-    NameAndTags( StringRef const& name_ = StringRef(), StringRef const& tags_ = StringRef() ) noexcept;
+    NameAndTags( StringRef const& name_ = StringRef(), StringRef const& tags_ = StringRef() ) ;
     StringRef name;
     StringRef tags;
 };
 
 struct AutoReg : NonCopyable {
-    AutoReg( ITestInvoker* invoker, SourceLineInfo const& lineInfo, StringRef const& classOrMethod, NameAndTags const& nameAndTags ) noexcept;
+    AutoReg( ITestInvoker* invoker, SourceLineInfo const& lineInfo, StringRef const& classOrMethod, NameAndTags const& nameAndTags ) ;
     ~AutoReg();
 };
 
@@ -1932,7 +1932,7 @@ namespace Catch {
         virtual void registerTest( TestCase const& testInfo ) = 0;
         virtual void registerTranslator( const IExceptionTranslator* translator ) = 0;
         virtual void registerTagAlias( std::string const& alias, std::string const& tag, SourceLineInfo const& lineInfo ) = 0;
-        virtual void registerStartupException() noexcept = 0;
+        virtual void registerStartupException()  = 0;
     };
 
     IRegistryHub& getRegistryHub();
@@ -3955,8 +3955,8 @@ namespace Catch {
 
         // Use constructed object for RAII guard
         Colour( Code _colourCode );
-        Colour( Colour&& other ) noexcept;
-        Colour& operator=( Colour&& other ) noexcept;
+        Colour( Colour&& other ) ;
+        Colour& operator=( Colour&& other ) ;
         ~Colour();
 
         // Use static method for one-shot changes
@@ -4167,8 +4167,8 @@ namespace Catch {
         public:
             ScopedElement( XmlWriter* writer );
 
-            ScopedElement( ScopedElement&& other ) noexcept;
-            ScopedElement& operator=( ScopedElement&& other ) noexcept;
+            ScopedElement( ScopedElement&& other ) ;
+            ScopedElement& operator=( ScopedElement&& other ) ;
 
             ~ScopedElement();
 
@@ -6576,13 +6576,13 @@ namespace Catch {
 
 namespace Catch {
 
-    bool SourceLineInfo::empty() const noexcept {
+    bool SourceLineInfo::empty() const  {
         return file[0] == '\0';
     }
-    bool SourceLineInfo::operator == ( SourceLineInfo const& other ) const noexcept {
+    bool SourceLineInfo::operator == ( SourceLineInfo const& other ) const  {
         return line == other.line && (file == other.file || std::strcmp(file, other.file) == 0);
     }
-    bool SourceLineInfo::operator < ( SourceLineInfo const& other ) const noexcept {
+    bool SourceLineInfo::operator < ( SourceLineInfo const& other ) const  {
         return line < other.line || ( line == other.line && (std::strcmp(file, other.file) < 0));
     }
 
@@ -6886,11 +6886,11 @@ namespace Catch {
 namespace Catch {
 
     Colour::Colour( Code _colourCode ) { use( _colourCode ); }
-    Colour::Colour( Colour&& rhs ) noexcept {
+    Colour::Colour( Colour&& rhs )  {
         m_moved = rhs.m_moved;
         rhs.m_moved = true;
     }
-    Colour& Colour::operator=( Colour&& rhs ) noexcept {
+    Colour& Colour::operator=( Colour&& rhs )  {
         m_moved = rhs.m_moved;
         rhs.m_moved  = true;
         return *this;
@@ -8181,7 +8181,7 @@ namespace Catch {
     class TestInvokerAsFunction : public ITestInvoker {
         void(*m_testAsFunction)();
     public:
-        TestInvokerAsFunction( void(*testAsFunction)() ) noexcept;
+        TestInvokerAsFunction( void(*testAsFunction)() ) ;
 
         void invoke() const override;
     };
@@ -8265,8 +8265,8 @@ namespace Catch {
 
     class StartupExceptionRegistry {
     public:
-        void add(std::exception_ptr const& exception) noexcept;
-        std::vector<std::exception_ptr> const& getExceptions() const noexcept;
+        void add(std::exception_ptr const& exception) ;
+        std::vector<std::exception_ptr> const& getExceptions() const ;
     private:
         std::vector<std::exception_ptr> m_exceptions;
     };
@@ -8315,7 +8315,7 @@ namespace Catch {
             void registerTagAlias( std::string const& alias, std::string const& tag, SourceLineInfo const& lineInfo ) override {
                 m_tagAliasRegistry.add( alias, tag, lineInfo );
             }
-            void registerStartupException() noexcept override {
+            void registerStartupException()  override {
                 m_exceptionRegistry.add(std::current_exception());
             }
 
@@ -9251,7 +9251,7 @@ namespace Catch {
 // start catch_startup_exception_registry.cpp
 
 namespace Catch {
-    void StartupExceptionRegistry::add( std::exception_ptr const& exception ) noexcept {
+    void StartupExceptionRegistry::add( std::exception_ptr const& exception )  {
         try {
             m_exceptions.push_back(exception);
         }
@@ -9261,7 +9261,7 @@ namespace Catch {
         }
     }
 
-    std::vector<std::exception_ptr> const& StartupExceptionRegistry::getExceptions() const noexcept {
+    std::vector<std::exception_ptr> const& StartupExceptionRegistry::getExceptions() const  {
         return m_exceptions;
     }
 
@@ -9296,7 +9296,7 @@ namespace Catch {
                 setp( data, data + sizeof(data) );
             }
 
-            ~StreamBufImpl() noexcept {
+            ~StreamBufImpl()  {
                 StreamBufImpl::sync();
             }
 
@@ -9554,7 +9554,7 @@ namespace {
 }
 
 namespace Catch {
-    StringRef::StringRef( char const* rawChars ) noexcept
+    StringRef::StringRef( char const* rawChars )
     : StringRef( rawChars, static_cast<StringRef::size_type>(std::strlen(rawChars) ) )
     {}
 
@@ -9562,7 +9562,7 @@ namespace Catch {
         return std::string( m_start, m_size );
     }
 
-    void StringRef::swap( StringRef& other ) noexcept {
+    void StringRef::swap( StringRef& other )  {
         std::swap( m_start, other.m_start );
         std::swap( m_size, other.m_size );
         std::swap( m_data, other.m_data );
@@ -9573,14 +9573,14 @@ namespace Catch {
            const_cast<StringRef*>( this )->takeOwnership();
         return m_start;
     }
-    auto StringRef::currentData() const noexcept -> char const* {
+    auto StringRef::currentData() const  -> char const* {
         return m_start;
     }
 
-    auto StringRef::isOwned() const noexcept -> bool {
+    auto StringRef::isOwned() const  -> bool {
         return m_data != nullptr;
     }
-    auto StringRef::isSubstring() const noexcept -> bool {
+    auto StringRef::isSubstring() const  -> bool {
         return m_start[m_size] != '\0';
     }
 
@@ -9592,26 +9592,26 @@ namespace Catch {
             m_start = m_data;
         }
     }
-    auto StringRef::substr( size_type start, size_type size ) const noexcept -> StringRef {
+    auto StringRef::substr( size_type start, size_type size ) const  -> StringRef {
         if( start < m_size )
             return StringRef( m_start+start, size );
         else
             return StringRef();
     }
-    auto StringRef::operator == ( StringRef const& other ) const noexcept -> bool {
+    auto StringRef::operator == ( StringRef const& other ) const  -> bool {
         return
             size() == other.size() &&
             (std::strncmp( m_start, other.m_start, size() ) == 0);
     }
-    auto StringRef::operator != ( StringRef const& other ) const noexcept -> bool {
+    auto StringRef::operator != ( StringRef const& other ) const  -> bool {
         return !operator==( other );
     }
 
-    auto StringRef::operator[](size_type index) const noexcept -> char {
+    auto StringRef::operator[](size_type index) const  -> char {
         return m_start[index];
     }
 
-    auto StringRef::numberOfCharacters() const noexcept -> size_type {
+    auto StringRef::numberOfCharacters() const  -> size_type {
         size_type noChars = m_size;
         // Make adjustments for uft encodings
         for( size_type i=0; i < m_size; ++i ) {
@@ -9965,7 +9965,7 @@ namespace Catch {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    TestInvokerAsFunction::TestInvokerAsFunction( void(*testAsFunction)() ) noexcept : m_testAsFunction( testAsFunction ) {}
+    TestInvokerAsFunction::TestInvokerAsFunction( void(*testAsFunction)() )  : m_testAsFunction( testAsFunction ) {}
 
     void TestInvokerAsFunction::invoke() const {
         m_testAsFunction();
@@ -10264,13 +10264,13 @@ using TestCaseTracking::IndexTracker;
 
 namespace Catch {
 
-    auto makeTestInvoker( void(*testAsFunction)() ) noexcept -> ITestInvoker* {
+    auto makeTestInvoker( void(*testAsFunction)() )  -> ITestInvoker* {
         return new(std::nothrow) TestInvokerAsFunction( testAsFunction );
     }
 
-    NameAndTags::NameAndTags( StringRef const& name_ , StringRef const& tags_ ) noexcept : name( name_ ), tags( tags_ ) {}
+    NameAndTags::NameAndTags( StringRef const& name_ , StringRef const& tags_ )  : name( name_ ), tags( tags_ ) {}
 
-    AutoReg::AutoReg( ITestInvoker* invoker, SourceLineInfo const& lineInfo, StringRef const& classOrMethod, NameAndTags const& nameAndTags ) noexcept {
+    AutoReg::AutoReg( ITestInvoker* invoker, SourceLineInfo const& lineInfo, StringRef const& classOrMethod, NameAndTags const& nameAndTags )  {
         try {
             getMutableRegistryHub()
                     .registerTest(
@@ -10914,11 +10914,11 @@ namespace Catch {
     :   m_writer( writer )
     {}
 
-    XmlWriter::ScopedElement::ScopedElement( ScopedElement&& other ) noexcept
+    XmlWriter::ScopedElement::ScopedElement( ScopedElement&& other )
     :   m_writer( other.m_writer ){
         other.m_writer = nullptr;
     }
-    XmlWriter::ScopedElement& XmlWriter::ScopedElement::operator=( ScopedElement&& other ) noexcept {
+    XmlWriter::ScopedElement& XmlWriter::ScopedElement::operator=( ScopedElement&& other )  {
         if ( m_writer ) {
             m_writer->endElement();
         }

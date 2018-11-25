@@ -46,12 +46,12 @@ class MONGOCXX_API pipeline {
     ///
     /// Move constructs a pipeline.
     ///
-    pipeline(pipeline&&) noexcept;
+    pipeline(pipeline&&) ;
 
     ///
     /// Move assigns a pipeline.
     ///
-    pipeline& operator=(pipeline&&) noexcept;
+    pipeline& operator=(pipeline&&) ;
 
     ///
     /// Destroys a pipeline.

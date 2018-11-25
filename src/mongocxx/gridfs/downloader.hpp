@@ -41,17 +41,17 @@ class MONGOCXX_API downloader {
     /// from downloader. The only valid actions to take with a default constructed downloader are to
     /// assign to it, or destroy it.
     ///
-    downloader() noexcept;
+    downloader() ;
 
     ///
     /// Move constructs a downloader.
     ///
-    downloader(downloader&&) noexcept;
+    downloader(downloader&&) ;
 
     ///
     /// Move assigns a downloader.
     ///
-    downloader& operator=(downloader&&) noexcept;
+    downloader& operator=(downloader&&) ;
 
     downloader(const downloader&) = delete;
 
@@ -66,7 +66,7 @@ class MONGOCXX_API downloader {
     /// Returns true if the downloader is valid, meaning it was not default constructed or moved
     /// from.
     ///
-    explicit operator bool() const noexcept;
+    explicit operator bool() const ;
 
     ///
     /// Reads a specified number of bytes from the GridFS file being downloaded.

@@ -66,17 +66,17 @@ class MONGOCXX_API bucket {
     /// bucket. The only valid actions to take with a default constructed bucket are to assign to
     /// it, or destroy it.
     ///
-    bucket() noexcept;
+    bucket() ;
 
     ///
     /// Move constructs a bucket.
     ///
-    bucket(bucket&&) noexcept;
+    bucket(bucket&&) ;
 
     ///
     /// Move assigns a bucket.
     ///
-    bucket& operator=(bucket&&) noexcept;
+    bucket& operator=(bucket&&) ;
 
     ///
     /// Copy constructs a bucket.
@@ -96,7 +96,7 @@ class MONGOCXX_API bucket {
     ///
     /// Returns true if the bucket is valid, meaning it was not default constructed or moved from.
     ///
-    explicit operator bool() const noexcept;
+    explicit operator bool() const ;
 
     ///
     /// @{

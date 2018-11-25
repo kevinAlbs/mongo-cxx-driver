@@ -89,12 +89,12 @@ class MONGOCXX_API read_concern {
     ///
     /// Move constructs a read_concern.
     ///
-    read_concern(read_concern&&) noexcept;
+    read_concern(read_concern&&) ;
 
     ///
     /// Move assigns a read_concern.
     ///
-    read_concern& operator=(read_concern&&) noexcept;
+    read_concern& operator=(read_concern&&) ;
 
     ///
     /// Destroys a read_concern.

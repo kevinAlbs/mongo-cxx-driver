@@ -66,7 +66,7 @@ class MONGOCXX_API logger {
     ///   The text of the current log message.
     virtual void operator()(log_level level,
                             stdx::string_view domain,
-                            stdx::string_view message) noexcept = 0;
+                            stdx::string_view message)  = 0;
 
    protected:
     ///

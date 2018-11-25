@@ -69,12 +69,12 @@ class MONGOCXX_API write {
     ///
     /// Move constructs a write.
     ///
-    write(write&& rhs) noexcept;
+    write(write&& rhs) ;
 
     ///
     /// Move assigns a write.
     ///
-    write& operator=(write&& rhs) noexcept;
+    write& operator=(write&& rhs) ;
 
     write(const write& rhs) = delete;
     write& operator=(const write& rhs) = delete;
@@ -133,7 +133,7 @@ class MONGOCXX_API write {
     const replace_one& get_replace_one() const;
 
    private:
-    MONGOCXX_PRIVATE void destroy_member() noexcept;
+    MONGOCXX_PRIVATE void destroy_member() ;
 
     write_type _type;
 

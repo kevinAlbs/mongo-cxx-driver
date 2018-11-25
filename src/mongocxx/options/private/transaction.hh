@@ -48,8 +48,8 @@ class transaction::impl {
         return *this;
     }
 
-    impl(impl&&) noexcept = default;
-    impl& operator=(impl&&) noexcept = default;
+    impl(impl&&)  = default;
+    impl& operator=(impl&&)  = default;
 
     void read_concern(const class read_concern& rc) {
         libmongoc::transaction_opts_set_read_concern(_transaction_opt_t.get(),
@@ -96,7 +96,7 @@ class transaction::impl {
         return stdx::optional<class read_preference>(std::move(rpi));
     }
 
-    mongoc_transaction_opt_t* get_transaction_opt_t() const noexcept {
+    mongoc_transaction_opt_t* get_transaction_opt_t() const  {
         return _transaction_opt_t.get();
     }
 

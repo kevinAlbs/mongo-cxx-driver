@@ -94,12 +94,12 @@ class MONGOCXX_API instance {
     ///
     /// Move constructs an instance of the driver.
     ///
-    instance(instance&&) noexcept;
+    instance(instance&&) ;
 
     ///
     /// Move assigns an instance of the driver.
     ///
-    instance& operator=(instance&&) noexcept;
+    instance& operator=(instance&&) ;
 
     ///
     /// Destroys an instance of the driver.

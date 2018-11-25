@@ -145,12 +145,12 @@ class MONGOCXX_API read_preference {
     ///
     /// Move constructs a read_preference.
     ///
-    read_preference(read_preference&&) noexcept;
+    read_preference(read_preference&&) ;
 
     ///
     /// Move assigns a read_preference.
     ///
-    read_preference& operator=(read_preference&&) noexcept;
+    read_preference& operator=(read_preference&&) ;
 
     ///
     /// Destroys a read_preference.

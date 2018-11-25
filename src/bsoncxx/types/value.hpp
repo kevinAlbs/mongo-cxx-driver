@@ -39,110 +39,110 @@ class BSONCXX_API value {
     ///
     /// Construct a value from a BSON double.
     ///
-    explicit value(b_double) noexcept;
+    explicit value(b_double) ;
 
     ///
     /// Construct a value from a BSON UTF-8 string.
     ///
-    explicit value(b_utf8) noexcept;
+    explicit value(b_utf8) ;
 
     ///
     /// Construct a value from a BSON document.
     ///
-    explicit value(b_document) noexcept;
+    explicit value(b_document) ;
 
     ///
     /// Construct a value from a BSON array.
     ///
-    explicit value(b_array) noexcept;
+    explicit value(b_array) ;
 
     ///
     /// Construct a value from a BSON binary datum.
     ///
-    explicit value(b_binary) noexcept;
+    explicit value(b_binary) ;
 
     ///
     /// Construct a value from a BSON undefined.
     ///
-    explicit value(b_undefined) noexcept;
+    explicit value(b_undefined) ;
 
     ///
     /// Construct a value from a BSON ObjectId.
     ///
-    explicit value(b_oid) noexcept;
+    explicit value(b_oid) ;
 
     ///
     /// Construct a value from a BSON boolean.
     ///
-    explicit value(b_bool) noexcept;
+    explicit value(b_bool) ;
 
     ///
     /// Construct a value from a BSON date.
     ///
-    explicit value(b_date) noexcept;
+    explicit value(b_date) ;
 
     ///
     /// Construct a value from a BSON null.
     ///
-    explicit value(b_null) noexcept;
+    explicit value(b_null) ;
 
     ///
     /// Construct a value from a BSON regex.
     ///
-    explicit value(b_regex) noexcept;
+    explicit value(b_regex) ;
 
     ///
     /// Construct a value from a BSON DBPointer.
     ///
-    explicit value(b_dbpointer) noexcept;
+    explicit value(b_dbpointer) ;
 
     ///
     /// Construct a value from a BSON JavaScript code.
     ///
-    explicit value(b_code) noexcept;
+    explicit value(b_code) ;
 
     ///
     /// Construct a value from a BSON symbol.
     ///
-    explicit value(b_symbol) noexcept;
+    explicit value(b_symbol) ;
 
     ///
     /// Construct a value from a BSON JavaScript code with scope.
     ///
-    explicit value(b_codewscope) noexcept;
+    explicit value(b_codewscope) ;
 
     ///
     /// Construct a value from a BSON 32-bit signed integer.
     ///
-    explicit value(b_int32) noexcept;
+    explicit value(b_int32) ;
 
     ///
     /// Construct a value from a BSON replication timestamp.
     ///
-    explicit value(b_timestamp) noexcept;
+    explicit value(b_timestamp) ;
 
     ///
     /// Construct a value from a BSON 64-bit signed integer.
     ///
-    explicit value(b_int64) noexcept;
+    explicit value(b_int64) ;
 
     ///
     /// Construct a value from a BSON Decimal128.
     ///
-    explicit value(b_decimal128) noexcept;
+    explicit value(b_decimal128) ;
 
     ///
     /// Construct a value from a BSON min-key.
     ///
-    explicit value(b_minkey) noexcept;
+    explicit value(b_minkey) ;
 
     ///
     /// Construct a value from a BSON max-key.
     ///
-    explicit value(b_maxkey) noexcept;
+    explicit value(b_maxkey) ;
 
-    value(const value&) noexcept;
-    value& operator=(const value&) noexcept;
+    value(const value&) ;
+    value& operator=(const value&) ;
 
     ~value();
 
@@ -354,7 +354,7 @@ class BSONCXX_API value {
     const b_maxkey& get_maxkey() const;
 
    private:
-    void BSONCXX_PRIVATE destroy() noexcept;
+    void BSONCXX_PRIVATE destroy() ;
 
     bsoncxx::type _type;
     union {

@@ -86,8 +86,8 @@ class view_or_value {
     /// Construct a view_or_value from a moved-in view_or_value.
     ///
 
-    /// TODO CXX-800: Create a noexcept expression to check the conditions that must be met.
-    BSONCXX_INLINE view_or_value(view_or_value &&other) noexcept
+    /// TODO CXX-800: Create a  expression to check the conditions that must be met.
+    BSONCXX_INLINE view_or_value(view_or_value &&other)
         : _value{std::move(other._value)},
           _view(_value ? *_value : std::move(other._view)) {
         other._view = View();
@@ -97,8 +97,8 @@ class view_or_value {
     ///
     /// Assign to this view_or_value from a moved-in view_or_value.
     ///
-    /// TODO CXX-800: Create a noexcept expression to check the conditions that must be met.
-    BSONCXX_INLINE view_or_value& operator=(view_or_value&& other) noexcept {
+    /// TODO CXX-800: Create a  expression to check the conditions that must be met.
+    BSONCXX_INLINE view_or_value& operator=(view_or_value&& other)  {
         _value = std::move(other._value);
         _view = _value ? *_value : std::move(other._view);
         other._view = View();
@@ -111,7 +111,7 @@ class view_or_value {
     ///
     /// @return bool Whether we are owning.
     ///
-    BSONCXX_INLINE bool is_owning() const noexcept {
+    BSONCXX_INLINE bool is_owning() const  {
         return static_cast<bool>(_value);
     }
 

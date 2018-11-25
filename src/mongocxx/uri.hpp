@@ -59,12 +59,12 @@ class MONGOCXX_API uri {
     ///
     /// Move constructs a uri.
     ///
-    uri(uri&&) noexcept;
+    uri(uri&&) ;
 
     ///
     /// Move assigns a uri.
     ///
-    uri& operator=(uri&&) noexcept;
+    uri& operator=(uri&&) ;
 
     ///
     /// Destroys a uri.

@@ -47,12 +47,12 @@ class MONGOCXX_API topology_description {
         ///
         /// Move constructs a server_descriptions array.
         ///
-        server_descriptions(server_descriptions&&) noexcept;
+        server_descriptions(server_descriptions&&) ;
 
         ///
         /// Move assigns a server_descriptions array.
         ///
-        server_descriptions& operator=(server_descriptions&&) noexcept;
+        server_descriptions& operator=(server_descriptions&&) ;
 
         server_descriptions(const server_descriptions&) = delete;
         server_descriptions& operator=(const server_descriptions&) = delete;
@@ -77,8 +77,8 @@ class MONGOCXX_API topology_description {
         ///
         /// Returns an iterator to the beginning.
         ///
-        iterator begin() noexcept;
-        const_iterator begin() const noexcept;
+        iterator begin() ;
+        const_iterator begin() const ;
 
         ///
         /// @}
@@ -89,8 +89,8 @@ class MONGOCXX_API topology_description {
         ///
         /// Returns an iterator to the end.
         ///
-        iterator end() noexcept;
-        const_iterator end() const noexcept;
+        iterator end() ;
+        const_iterator end() const ;
 
         ///
         /// @}
@@ -99,12 +99,12 @@ class MONGOCXX_API topology_description {
         ///
         /// The number of server_description instances in the array.
         ///
-        std::size_t size() const noexcept;
+        std::size_t size() const ;
 
        private:
         friend topology_description;
         MONGOCXX_PRIVATE explicit server_descriptions(void* sds, std::size_t size);
-        MONGOCXX_PRIVATE void swap(server_descriptions& other) noexcept;
+        MONGOCXX_PRIVATE void swap(server_descriptions& other) ;
         container _container;
         void* _sds;
         std::size_t _size;

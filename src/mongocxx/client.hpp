@@ -61,7 +61,7 @@ class MONGOCXX_API client {
     /// state of a moved-from client. The only valid actions to take with a default constructed
     /// 'client' are to assign to it, or destroy it.
     ///
-    client() noexcept;
+    client() ;
 
     ///
     /// Creates a new client connection to MongoDB.
@@ -79,12 +79,12 @@ class MONGOCXX_API client {
     ///
     /// Move constructs a client.
     ///
-    client(client&&) noexcept;
+    client(client&&) ;
 
     ///
     /// Move assigns a client.
     ///
-    client& operator=(client&&) noexcept;
+    client& operator=(client&&) ;
 
     ///
     /// Destroys a client.
@@ -95,7 +95,7 @@ class MONGOCXX_API client {
     /// Returns true if the client is valid, meaning it was not default constructed
     /// or moved from.
     ///
-    explicit operator bool() const noexcept;
+    explicit operator bool() const ;
 
     ///
     /// Sets the read concern for this client.

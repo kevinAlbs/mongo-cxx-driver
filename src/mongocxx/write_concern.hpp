@@ -79,12 +79,12 @@ class MONGOCXX_API write_concern {
     ///
     /// Move constructs a write_concern.
     ///
-    write_concern(write_concern&&) noexcept;
+    write_concern(write_concern&&) ;
 
     ///
     /// Move assigns a write_concern.
     ///
-    write_concern& operator=(write_concern&&) noexcept;
+    write_concern& operator=(write_concern&&) ;
 
     ///
     /// Destroys a write_concern.

@@ -48,17 +48,17 @@ class MONGOCXX_API database {
     /// to the state of a moved-from database. The only valid actions to take with a default
     /// constructed database are to assign to it, or destroy it.
     ///
-    database() noexcept;
+    database() ;
 
     ///
     /// Move constructs a database.
     ///
-    database(database&&) noexcept;
+    database(database&&) ;
 
     ///
     /// Move assigns a database.
     ///
-    database& operator=(database&&) noexcept;
+    database& operator=(database&&) ;
 
     ///
     /// Copy constructs a database.
@@ -79,7 +79,7 @@ class MONGOCXX_API database {
     /// Returns true if the client is valid, meaning it was not default constructed
     /// or moved from.
     ///
-    explicit operator bool() const noexcept;
+    explicit operator bool() const ;
 
     ///
     /// @{

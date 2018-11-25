@@ -40,12 +40,12 @@ class MONGOCXX_API client_session {
     ///
     /// Move constructs a session.
     ///
-    client_session(client_session&&) noexcept;
+    client_session(client_session&&) ;
 
     ///
     /// Move assigns a session.
     ///
-    client_session& operator=(client_session&&) noexcept;
+    client_session& operator=(client_session&&) ;
 
     client_session(const client_session&) = delete;
     client_session& operator=(const client_session&) = delete;
@@ -53,23 +53,23 @@ class MONGOCXX_API client_session {
     ///
     /// Ends and destroys the session.
     ///
-    ~client_session() noexcept;
+    ~client_session() ;
 
     ///
     /// Gets the client that started this session.
     ///
-    const class client& client() const noexcept;
+    const class client& client() const ;
 
     ///
     /// Gets the options this session was created with.
     ///
-    const options::client_session& options() const noexcept;
+    const options::client_session& options() const ;
 
     ///
     /// Get the server-side "logical session ID" associated with this session, as a BSON document.
     /// This view is invalid after the session is destroyed.
     ///
-    bsoncxx::document::view id() const noexcept;
+    bsoncxx::document::view id() const ;
 
     ///
     /// Get the session's clusterTime, as a BSON document. This is an opaque value suitable for
@@ -77,14 +77,14 @@ class MONGOCXX_API client_session {
     /// not been used for any operation and you have not called advance_cluster_time().
     /// This view is invalid after the session is destroyed.
     ///
-    bsoncxx::document::view cluster_time() const noexcept;
+    bsoncxx::document::view cluster_time() const ;
 
     ///
     /// Get the session's operationTime, as a BSON timestamp. This is an opaque value suitable for
     /// passing to advance_operation_time(). The timestamp is zero if the session has not been used
     /// for any operation and you have not called advance_operation_time().
     ///
-    bsoncxx::types::b_timestamp operation_time() const noexcept;
+    bsoncxx::types::b_timestamp operation_time() const ;
 
     ///
     /// Advance the cluster time for a session. Has an effect only if the new cluster time is

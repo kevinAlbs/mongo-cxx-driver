@@ -45,12 +45,12 @@ class MONGOCXX_API bulk_write {
     ///
     /// Move constructs a bulk write operation.
     ///
-    bulk_write(bulk_write&&) noexcept;
+    bulk_write(bulk_write&&) ;
 
     ///
     /// Move assigns a bulk write operation.
     ///
-    bulk_write& operator=(bulk_write&&) noexcept;
+    bulk_write& operator=(bulk_write&&) ;
 
     ///
     /// Destroys a bulk write operation.

@@ -51,8 +51,8 @@ class BSONCXX_API core {
     ///
     explicit core(bool is_array);
 
-    core(core&& rhs) noexcept;
-    core& operator=(core&& rhs) noexcept;
+    core(core&& rhs) ;
+    core& operator=(core&& rhs) ;
 
     ~core();
 

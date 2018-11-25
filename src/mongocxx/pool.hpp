@@ -74,18 +74,18 @@ class MONGOCXX_API pool {
     class MONGOCXX_API entry {
        public:
         /// Access a member of the client instance.
-        client* operator->() const& noexcept;
+        client* operator->() const& ;
         client* operator->() && = delete;
 
         /// Retrieve a reference to the client.
-        client& operator*() const& noexcept;
+        client& operator*() const& ;
         client& operator*() && = delete;
 
         /// Assign nullptr to this entry to release its client to the pool.
-        entry& operator=(std::nullptr_t) noexcept;
+        entry& operator=(std::nullptr_t) ;
 
         /// Return true if this entry has a client acquired from the pool.
-        explicit operator bool() const noexcept;
+        explicit operator bool() const ;
 
        private:
         friend class pool;

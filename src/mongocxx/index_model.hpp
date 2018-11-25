@@ -39,12 +39,12 @@ class MONGOCXX_API index_model {
     ///
     /// Move constructs an index_model.
     ///
-    index_model(index_model&&) noexcept;
+    index_model(index_model&&) ;
 
     ///
     /// Move assigns an index_model.
     ///
-    index_model& operator=(index_model&&) noexcept;
+    index_model& operator=(index_model&&) ;
 
     ///
     /// Copy constructs an index_model.

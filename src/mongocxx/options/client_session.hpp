@@ -47,12 +47,12 @@ class MONGOCXX_API client_session {
     /// @see
     /// https://docs.mongodb.com/manual/core/read-isolation-consistency-recency/#causal-consistency
     ///
-    client_session& causal_consistency(bool causal_consistency) noexcept;
+    client_session& causal_consistency(bool causal_consistency) ;
 
     ///
     /// Gets the current value of the causal_consistency option.
     ///
-    bool causal_consistency() const noexcept;
+    bool causal_consistency() const ;
 
     ///
     /// Sets the default transaction options.

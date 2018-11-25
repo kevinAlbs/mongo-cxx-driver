@@ -58,21 +58,21 @@ class client_session::impl {
             s, [](mongoc_client_session_t* cs) { libmongoc::client_session_destroy(cs); }};
     }
 
-    const class client& client() const noexcept {
+    const class client& client() const  {
         return *_client;
     }
 
-    const options::client_session& options() const noexcept {
+    const options::client_session& options() const  {
         return _options;
     }
 
     // Get session id, also known as "logical session id" or "lsid".
-    bsoncxx::document::view id() const noexcept {
+    bsoncxx::document::view id() const  {
         return bsoncxx::helpers::view_from_bson_t(
             libmongoc::client_session_get_lsid(_session_t.get()));
     }
 
-    bsoncxx::document::view cluster_time() const noexcept {
+    bsoncxx::document::view cluster_time() const  {
         const bson_t* ct = libmongoc::client_session_get_cluster_time(_session_t.get());
         if (ct) {
             return bsoncxx::helpers::view_from_bson_t(ct);
@@ -81,20 +81,20 @@ class client_session::impl {
         return bsoncxx::helpers::view_from_bson_t(&_empty_cluster_time);
     }
 
-    bsoncxx::types::b_timestamp operation_time() const noexcept {
+    bsoncxx::types::b_timestamp operation_time() const  {
         bsoncxx::types::b_timestamp ts;
         libmongoc::client_session_get_operation_time(
             _session_t.get(), &ts.timestamp, &ts.increment);
         return ts;
     }
 
-    void advance_cluster_time(const bsoncxx::document::view& cluster_time) noexcept {
+    void advance_cluster_time(const bsoncxx::document::view& cluster_time)  {
         bson_t bson;
         bson_init_static(&bson, cluster_time.data(), cluster_time.length());
         libmongoc::client_session_advance_cluster_time(_session_t.get(), &bson);
     }
 
-    void advance_operation_time(const bsoncxx::types::b_timestamp& operation_time) noexcept {
+    void advance_operation_time(const bsoncxx::types::b_timestamp& operation_time)  {
         libmongoc::client_session_advance_operation_time(
             _session_t.get(), operation_time.timestamp, operation_time.increment);
     }
@@ -140,7 +140,7 @@ class client_session::impl {
         return bsoncxx::helpers::value_from_bson_t(&bson);
     }
 
-    mongoc_client_session_t* get_session_t() const noexcept {
+    mongoc_client_session_t* get_session_t() const  {
         return _session_t.get();
     }
 
