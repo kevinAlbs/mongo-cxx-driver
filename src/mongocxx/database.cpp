@@ -70,10 +70,10 @@ class collection_names {
 
 using namespace libbson;
 
-database::database() noexcept = default;
+database::database()  = default;
 
-database::database(database&&) noexcept = default;
-database& database::operator=(database&&) noexcept = default;
+database::database(database&&)  = default;
+database& database::operator=(database&&)  = default;
 
 database::~database() = default;
 
@@ -101,7 +101,7 @@ database& database::operator=(const database& d) {
     return *this;
 }
 
-database::operator bool() const noexcept {
+database::operator bool() const  {
     return static_cast<bool>(_impl);
 }
 

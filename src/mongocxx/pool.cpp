@@ -66,20 +66,20 @@ pool::pool(const uri& uri, const options::pool& options)
     }
 }
 
-client* pool::entry::operator->() const& noexcept {
+client* pool::entry::operator->() const&  {
     return _client.get();
 }
 
-client& pool::entry::operator*() const& noexcept {
+client& pool::entry::operator*() const&  {
     return *_client;
 }
 
-pool::entry& pool::entry::operator=(std::nullptr_t) noexcept {
+pool::entry& pool::entry::operator=(std::nullptr_t)  {
     _client = nullptr;
     return *this;
 }
 
-pool::entry::operator bool() const noexcept {
+pool::entry::operator bool() const  {
     return static_cast<bool>(_client);
 }
 

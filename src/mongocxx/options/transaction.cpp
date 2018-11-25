@@ -26,8 +26,8 @@ namespace options {
 
 transaction::transaction() : _impl{stdx::make_unique<impl>()} {}
 
-transaction::transaction(transaction&&) noexcept = default;
-transaction& transaction::operator=(transaction&&) noexcept = default;
+transaction::transaction(transaction&&)  = default;
+transaction& transaction::operator=(transaction&&)  = default;
 
 transaction::transaction(const transaction& other)
     : _impl{stdx::make_unique<impl>(other._get_impl().get_transaction_opt_t())} {}
@@ -37,7 +37,7 @@ transaction& transaction::operator=(const transaction& other) {
     return *this;
 }
 
-transaction::~transaction() noexcept = default;
+transaction::~transaction()  = default;
 
 transaction& transaction::read_concern(const class read_concern& rc) {
     _impl->read_concern(rc);

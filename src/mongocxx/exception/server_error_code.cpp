@@ -28,11 +28,11 @@ namespace {
 //
 class server_error_category final : public std::error_category {
    public:
-    const char* name() const noexcept override {
+    const char* name() const  override {
         return "mongodb";
     }
 
-    std::string message(int) const noexcept override {
+    std::string message(int) const  override {
         return "generic server error";
     }
 };

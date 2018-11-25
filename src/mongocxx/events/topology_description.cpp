@@ -23,12 +23,12 @@ MONGOCXX_INLINE_NAMESPACE_BEGIN
 namespace events {
 
 topology_description::server_descriptions::server_descriptions(
-    server_descriptions&& other) noexcept {
+    server_descriptions&& other)  {
     swap(other);
 }
 
 topology_description::server_descriptions& topology_description::server_descriptions::operator=(
-    mongocxx::events::topology_description::server_descriptions&& other) noexcept {
+    mongocxx::events::topology_description::server_descriptions&& other)  {
     swap(other);
     return *this;
 }
@@ -41,26 +41,26 @@ topology_description::server_descriptions::~server_descriptions() {
 }
 
 topology_description::server_descriptions::iterator
-topology_description::server_descriptions::begin() noexcept {
+topology_description::server_descriptions::begin()  {
     return _container.begin();
 }
 
 topology_description::server_descriptions::const_iterator
-topology_description::server_descriptions::begin() const noexcept {
+topology_description::server_descriptions::begin() const  {
     return _container.cbegin();
 }
 
 topology_description::server_descriptions::iterator
-topology_description::server_descriptions::end() noexcept {
+topology_description::server_descriptions::end()  {
     return _container.end();
 }
 
 topology_description::server_descriptions::const_iterator
-topology_description::server_descriptions::end() const noexcept {
+topology_description::server_descriptions::end() const  {
     return _container.cend();
 }
 
-std::size_t topology_description::server_descriptions::size() const noexcept {
+std::size_t topology_description::server_descriptions::size() const  {
     return _size;
 }
 
@@ -72,7 +72,7 @@ topology_description::server_descriptions::server_descriptions(void* sds, std::s
 }
 
 void topology_description::server_descriptions::swap(
-    topology_description::server_descriptions& other) noexcept {
+    topology_description::server_descriptions& other)  {
     std::swap(_sds, other._sds);
     std::swap(_size, other._size);
     std::swap(_container, other._container);

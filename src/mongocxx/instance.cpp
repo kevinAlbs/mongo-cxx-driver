@@ -131,8 +131,8 @@ instance::instance(std::unique_ptr<logger> logger) {
     _impl = stdx::make_unique<impl>(std::move(logger));
 }
 
-instance::instance(instance&&) noexcept = default;
-instance& instance::operator=(instance&&) noexcept = default;
+instance::instance(instance&&)  = default;
+instance& instance::operator=(instance&&)  = default;
 
 instance::~instance() {
     current_instance.store(reinterpret_cast<instance*>(&sentinel));

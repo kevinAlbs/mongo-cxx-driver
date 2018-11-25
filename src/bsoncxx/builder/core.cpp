@@ -254,8 +254,8 @@ core::core(bool is_array) {
     _impl = stdx::make_unique<impl>(is_array);
 }
 
-core::core(core&&) noexcept = default;
-core& core::operator=(core&&) noexcept = default;
+core::core(core&&)  = default;
+core& core::operator=(core&&)  = default;
 core::~core() = default;
 
 core& core::key_view(stdx::string_view key) {

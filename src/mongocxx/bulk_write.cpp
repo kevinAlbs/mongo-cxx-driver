@@ -36,8 +36,8 @@ MONGOCXX_INLINE_NAMESPACE_BEGIN
 using namespace libbson;
 using bsoncxx::builder::basic::kvp;
 
-bulk_write::bulk_write(bulk_write&&) noexcept = default;
-bulk_write& bulk_write::operator=(bulk_write&&) noexcept = default;
+bulk_write::bulk_write(bulk_write&&)  = default;
+bulk_write& bulk_write::operator=(bulk_write&&)  = default;
 
 bulk_write::~bulk_write() = default;
 

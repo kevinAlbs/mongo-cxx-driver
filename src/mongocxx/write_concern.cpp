@@ -34,8 +34,8 @@ write_concern::write_concern(std::unique_ptr<impl>&& implementation) {
     _impl.reset(implementation.release());
 }
 
-write_concern::write_concern(write_concern&&) noexcept = default;
-write_concern& write_concern::operator=(write_concern&&) noexcept = default;
+write_concern::write_concern(write_concern&&)  = default;
+write_concern& write_concern::operator=(write_concern&&)  = default;
 
 write_concern::write_concern(const write_concern& other)
     : _impl(stdx::make_unique<impl>(libmongoc::write_concern_copy(other._impl->write_concern_t))) {}

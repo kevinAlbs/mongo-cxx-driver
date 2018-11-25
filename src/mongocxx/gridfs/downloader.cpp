@@ -33,12 +33,12 @@ namespace gridfs {
 downloader::downloader(stdx::optional<cursor> chunks, bsoncxx::document::value files_doc)
     : _impl{stdx::make_unique<impl>(std::move(chunks), std::move(files_doc))} {}
 
-downloader::downloader() noexcept = default;
-downloader::downloader(downloader&&) noexcept = default;
-downloader& downloader::operator=(downloader&&) noexcept = default;
+downloader::downloader()  = default;
+downloader::downloader(downloader&&)  = default;
+downloader& downloader::operator=(downloader&&)  = default;
 downloader::~downloader() = default;
 
-downloader::operator bool() const noexcept {
+downloader::operator bool() const  {
     return static_cast<bool>(_impl);
 }
 

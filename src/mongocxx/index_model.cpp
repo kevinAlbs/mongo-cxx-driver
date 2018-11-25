@@ -23,9 +23,9 @@ index_model::index_model(const bsoncxx::document::view_or_value& keys,
                          const bsoncxx::document::view_or_value& options)
     : _keys{keys.view()}, _options{options.view()} {}
 
-index_model::index_model(index_model&&) noexcept = default;
+index_model::index_model(index_model&&)  = default;
 
-index_model& index_model::operator=(index_model&&) noexcept = default;
+index_model& index_model::operator=(index_model&&)  = default;
 
 index_model::index_model(const index_model&) = default;
 

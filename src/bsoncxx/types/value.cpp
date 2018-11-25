@@ -26,11 +26,11 @@ namespace bsoncxx {
 BSONCXX_INLINE_NAMESPACE_BEGIN
 namespace types {
 
-// Boost doesn't mark the copy constructor and copy-assignment operator of string_ref as noexcept
-// so we can't rely on automatic noexcept propagation. It really is though, so it is OK.
+// Boost doesn't mark the copy constructor and copy-assignment operator of string_ref as
+// so we can't rely on automatic  propagation. It really is though, so it is OK.
 #if !defined(BSONCXX_POLY_USE_BOOST)
 #define BSONCXX_ENUM(name, val)                                                                \
-    value::value(b_##name value) noexcept : _type(static_cast<bsoncxx::type>(val)),            \
+    value::value(b_##name value)  : _type(static_cast<bsoncxx::type>(val)),            \
                                             _b_##name(std::move(value)) {                      \
         static_assert(std::is_nothrow_copy_constructible<b_##name>::value, "Copy may throw");  \
         static_assert(std::is_nothrow_copy_assignable<b_##name>::value, "Copy may throw");     \
@@ -38,7 +38,7 @@ namespace types {
     }
 #else
 #define BSONCXX_ENUM(name, val)                                                                \
-    value::value(b_##name value) noexcept : _type(static_cast<bsoncxx::type>(val)),            \
+    value::value(b_##name value)  : _type(static_cast<bsoncxx::type>(val)),            \
                                             _b_##name(std::move(value)) {                      \
         static_assert(std::is_nothrow_destructible<b_##name>::value, "Destruction may throw"); \
     }
@@ -47,7 +47,7 @@ namespace types {
 #include <bsoncxx/enums/type.hpp>
 #undef BSONCXX_ENUM
 
-value::value(const value& rhs) noexcept {
+value::value(const value& rhs)  {
     switch (static_cast<int>(rhs._type)) {
 #define BSONCXX_ENUM(type, val)                      \
     case val:                                        \
@@ -60,7 +60,7 @@ value::value(const value& rhs) noexcept {
     _type = rhs._type;
 }
 
-value& value::operator=(const value& rhs) noexcept {
+value& value::operator=(const value& rhs)  {
     if (this == &rhs) {
         return *this;
     }
@@ -116,7 +116,7 @@ bool operator!=(const value& lhs, const value& rhs) {
     return !(lhs == rhs);
 }
 
-void value::destroy() noexcept {
+void value::destroy()  {
     switch (static_cast<int>(_type)) {
 #define BSONCXX_ENUM(type, val) \
     case val:                   \

@@ -79,12 +79,12 @@ bucket::bucket(const database& db, const options::gridfs::bucket& options) {
     }
 }
 
-bucket::bucket() noexcept = default;
-bucket::bucket(bucket&&) noexcept = default;
-bucket& bucket::operator=(bucket&&) noexcept = default;
+bucket::bucket()  = default;
+bucket::bucket(bucket&&)  = default;
+bucket& bucket::operator=(bucket&&)  = default;
 bucket::~bucket() = default;
 
-bucket::operator bool() const noexcept {
+bucket::operator bool() const  {
     return static_cast<bool>(_impl);
 }
 

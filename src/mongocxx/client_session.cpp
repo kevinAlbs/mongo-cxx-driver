@@ -28,29 +28,29 @@ client_session::client_session(const class client* client,
                                const mongocxx::options::client_session& options)
     : _impl(stdx::make_unique<impl>(client, options)) {}
 
-client_session::client_session(client_session&&) noexcept = default;
+client_session::client_session(client_session&&)  = default;
 
-client_session& client_session::operator=(client_session&&) noexcept = default;
+client_session& client_session::operator=(client_session&&)  = default;
 
-client_session::~client_session() noexcept = default;
+client_session::~client_session()  = default;
 
-const mongocxx::client& client_session::client() const noexcept {
+const mongocxx::client& client_session::client() const  {
     return _impl->client();
 }
 
-const mongocxx::options::client_session& client_session::options() const noexcept {
+const mongocxx::options::client_session& client_session::options() const  {
     return _impl->options();
 }
 
-bsoncxx::document::view client_session::id() const noexcept {
+bsoncxx::document::view client_session::id() const  {
     return _impl->id();
 }
 
-bsoncxx::document::view client_session::cluster_time() const noexcept {
+bsoncxx::document::view client_session::cluster_time() const  {
     return _impl->cluster_time();
 }
 
-bsoncxx::types::b_timestamp client_session::operation_time() const noexcept {
+bsoncxx::types::b_timestamp client_session::operation_time() const  {
     return _impl->operation_time();
 }
 

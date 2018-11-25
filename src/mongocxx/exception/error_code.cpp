@@ -28,11 +28,11 @@ namespace {
 //
 class error_category final : public std::error_category {
    public:
-    const char* name() const noexcept override {
+    const char* name() const  override {
         return "mongocxx";
     }
 
-    std::string message(int code) const noexcept override {
+    std::string message(int code) const  override {
         switch (static_cast<error_code>(code)) {
             case error_code::k_invalid_client_object:
                 return "invalid use of default constructed or moved-from mongocxx::client object";

@@ -53,7 +53,7 @@ write::write(replace_one value) : _type(write_type::k_replace_one), _replace_one
     static_assert(std::is_nothrow_move_assignable<replace_one>::value, "Move-assign may throw");
 }
 
-write::write(write&& rhs) noexcept {
+write::write(write&& rhs)  {
     switch (rhs._type) {
         case write_type::k_insert_one:
             new (&_insert_one) insert_one(std::move(rhs._insert_one));
@@ -78,7 +78,7 @@ write::write(write&& rhs) noexcept {
     _type = rhs._type;
 }
 
-void write::destroy_member() noexcept {
+void write::destroy_member()  {
     switch (_type) {
         case write_type::k_insert_one:
             _insert_one.~insert_one();
@@ -101,7 +101,7 @@ void write::destroy_member() noexcept {
     }
 }
 
-write& write::operator=(write&& rhs) noexcept {
+write& write::operator=(write&& rhs)  {
     if (this == &rhs) {
         return *this;
     }

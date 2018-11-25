@@ -78,7 +78,7 @@ void configure(mongocxx::uri uri) {
        public:
         virtual void operator()(mongocxx::log_level,
                                 bsoncxx::stdx::string_view,
-                                bsoncxx::stdx::string_view) noexcept {}
+                                bsoncxx::stdx::string_view)  {}
     };
 
     auto instance =

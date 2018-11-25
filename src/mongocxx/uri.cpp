@@ -54,8 +54,8 @@ uri::uri(bsoncxx::string::view_or_value uri_string)
     }
 }
 
-uri::uri(uri&&) noexcept = default;
-uri& uri::operator=(uri&&) noexcept = default;
+uri::uri(uri&&)  = default;
+uri& uri::operator=(uri&&)  = default;
 
 uri::~uri() = default;
 

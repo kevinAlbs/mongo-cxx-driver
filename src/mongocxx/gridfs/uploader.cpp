@@ -61,12 +61,12 @@ uploader::uploader(const client_session* session,
                                                    bsoncxx::document::value{metadata->view()})
                                              : stdx::nullopt)} {}
 
-uploader::uploader() noexcept = default;
-uploader::uploader(uploader&&) noexcept = default;
-uploader& uploader::operator=(uploader&&) noexcept = default;
+uploader::uploader()  = default;
+uploader::uploader(uploader&&)  = default;
+uploader& uploader::operator=(uploader&&)  = default;
 uploader::~uploader() = default;
 
-uploader::operator bool() const noexcept {
+uploader::operator bool() const  {
     return static_cast<bool>(_impl);
 }
 

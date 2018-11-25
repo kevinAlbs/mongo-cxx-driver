@@ -27,8 +27,8 @@
 namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
 
-read_preference::read_preference(read_preference&&) noexcept = default;
-read_preference& read_preference::operator=(read_preference&&) noexcept = default;
+read_preference::read_preference(read_preference&&)  = default;
+read_preference& read_preference::operator=(read_preference&&)  = default;
 
 read_preference::read_preference(const read_preference& other)
     : _impl(stdx::make_unique<impl>(libmongoc::read_prefs_copy(other._impl->read_preference_t))) {}

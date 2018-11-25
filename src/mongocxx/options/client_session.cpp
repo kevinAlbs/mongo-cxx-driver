@@ -20,12 +20,12 @@ namespace mongocxx {
 MONGOCXX_INLINE_NAMESPACE_BEGIN
 namespace options {
 
-client_session& client_session::causal_consistency(bool causal_consistency) noexcept {
+client_session& client_session::causal_consistency(bool causal_consistency)  {
     _causal_consistency = causal_consistency;
     return *this;
 }
 
-bool client_session::causal_consistency() const noexcept {
+bool client_session::causal_consistency() const  {
     return _causal_consistency;
 }
 

@@ -44,9 +44,9 @@ static_assert(std::is_class<change_stream::iterator::value_type>::value, "");
 static_assert(std::is_pointer<change_stream::iterator::pointer>::value, "");
 static_assert(std::is_reference<change_stream::iterator::reference>::value, "");
 
-change_stream::change_stream(change_stream&&) noexcept = default;
+change_stream::change_stream(change_stream&&)  = default;
 
-change_stream& change_stream::operator=(change_stream&&) noexcept = default;
+change_stream& change_stream::operator=(change_stream&&)  = default;
 
 change_stream::~change_stream() = default;
 
@@ -102,7 +102,7 @@ change_stream::iterator::iterator(const iter_type type, const change_stream* cha
 // support a collection of iterators for change streams from different
 // collections.
 bool MONGOCXX_CALL operator==(const change_stream::iterator& lhs,
-                              const change_stream::iterator& rhs) noexcept {
+                              const change_stream::iterator& rhs)  {
     // Tracking different streams never equal.
     if (lhs._change_stream != rhs._change_stream) {
         return false;
@@ -122,7 +122,7 @@ bool MONGOCXX_CALL operator==(const change_stream::iterator& lhs,
 }
 
 bool MONGOCXX_CALL operator!=(const change_stream::iterator& lhs,
-                              const change_stream::iterator& rhs) noexcept {
+                              const change_stream::iterator& rhs)  {
     return !(lhs == rhs);
 }
 

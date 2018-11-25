@@ -30,8 +30,8 @@ MONGOCXX_INLINE_NAMESPACE_BEGIN
 
 pipeline::pipeline() : _impl(stdx::make_unique<impl>()) {}
 
-pipeline::pipeline(pipeline&&) noexcept = default;
-pipeline& pipeline::operator=(pipeline&&) noexcept = default;
+pipeline::pipeline(pipeline&&)  = default;
+pipeline& pipeline::operator=(pipeline&&)  = default;
 pipeline::~pipeline() = default;
 
 pipeline& pipeline::add_fields(bsoncxx::document::view_or_value fields_to_add) {

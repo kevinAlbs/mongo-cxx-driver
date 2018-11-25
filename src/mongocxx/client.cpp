@@ -38,7 +38,7 @@ MONGOCXX_INLINE_NAMESPACE_BEGIN
 
 using namespace libbson;
 
-client::client() noexcept = default;
+client::client()  = default;
 
 client::client(const class uri& uri, const options::client& options) {
 #if defined(MONGOCXX_ENABLE_SSL) && defined(MONGOC_ENABLE_SSL)
@@ -81,12 +81,12 @@ client::client(const class uri& uri, const options::client& options) {
 client::client(void* implementation)
     : _impl{stdx::make_unique<impl>(static_cast<::mongoc_client_t*>(implementation))} {}
 
-client::client(client&&) noexcept = default;
-client& client::operator=(client&&) noexcept = default;
+client::client(client&&)  = default;
+client& client::operator=(client&&)  = default;
 
 client::~client() = default;
 
-client::operator bool() const noexcept {
+client::operator bool() const  {
     return static_cast<bool>(_impl);
 }
 
