@@ -88,9 +88,11 @@ class change_stream::impl {
         if (libmongoc::change_stream_error_document(this->change_stream_, &error, &out)) {
             this->mark_dead();
             this->doc_ = bsoncxx::document::view{};
+            printf ("got error: %s", bson_as_json (out, NULL));
             mongocxx::libbson::scoped_bson_t scoped_error_reply{};
             bson_copy_to(out, scoped_error_reply.bson_for_init());
-            throw_exception<query_exception>(scoped_error_reply.steal(), error);
+            auto val = scoped_error_reply.steal();
+            throw_exception<query_exception>(val, error);
         }
 
         // Just nothing left.
