@@ -289,18 +289,20 @@ def working_dir_on_valid_branch(release_version):
 
     version_loose = LooseVersion(release_version)
     repo = Repo('.')
+    exp_branches = ['releases/v{}.{}'.format(version_loose.version[0], version_loose.version[1])]
 
+    # For a new minor release, like X.Y.0, there are two cases:
+    # If there were prior prereleases, expect to be on releases/vX.Y.
+    # Otherwise it is the first release, expect to be on master.
     if version_loose.version[2] == 0:
-        exp_branch = 'master'
-    else:
-        exp_branch = 'releases/v{}.{}'.format(version_loose.version[0], version_loose.version[1])
+        exp_branches.append('master')
 
-    if repo.active_branch.name == exp_branch:
+    if repo.active_branch.name in exp_branches:
         return True
 
-    click.echo('Expected branch "{}" for release version "{}", but working '
+    click.echo('Expected to be on branch(es): "{}" for release version "{}", but working '
                'directory is on branch "{}"...exiting!'
-               .format(exp_branch, release_version, repo.active_branch.name), err=True)
+               .format(", ".join(exp_branches), release_version, repo.active_branch.name), err=True)
     return False
 
 def release_tag_points_to_head(release_tag):

@@ -24,6 +24,17 @@ pip install -r etc/requirements.txt
 ```
 
 ## Tag the release
+If doing a minor release (e.g. `3.6.0`) create the branch.
+
+```
+git checkout -b releases/v3.6
+```
+
+If doing a patch release (e.g. `3.6.1`) check out the existing branch.
+```
+git checkout releases/v3.6
+```
+
 Create a tag for the commit to serve as the release (or release candidate):
 
 ```
