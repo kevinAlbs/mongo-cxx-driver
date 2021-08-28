@@ -57,6 +57,52 @@ bool check_for_collections(cursor cursor, std::set<std::string> expected_colls) 
     return expected_colls.empty();
 }
 
+TEST_CASE("Test serviceId is included in command monitoring events") {
+    // Sketch:
+    // x 1. Create a client with event listeners. 
+    // x 2. Send a {ping: 1} command with database::run_command.
+    // 3. Set a mock implementation for mongoc_apm_command_started_get_service_id to return a mocked serviceId
+    // 4. Expect the C++ apm::command_started_event::service_id to have the same oid.
+    instance::current();
+
+    // mongodb://localhost:27017 is the default URI. 27017 is the default port.
+    auto client_opts = test_util::add_test_server_api();
+
+    // APM = Application Performance Monitoring.
+    mongocxx::options::apm apm_opts;
+    apm_opts.on_command_started ([&] (const mongocxx::events::command_started_event& event) {
+        // This is not mocking a C function, but listening for CommandStarted events.
+        std::cout << "command_started_event called on command " << event.command_name () << std::endl;
+        auto service_id = event.service_id ();
+        if (service_id) {
+            std::cout << "service_id is set in command_started_event" << std::endl;
+        } else {
+            std::cout << "service_id is NOT set in command_started_event" << std::endl;
+        }
+    });
+    client_opts.apm_opts (apm_opts);
+    // Adding ?loadBalanced=true results in an error in the C driver because
+    // the initial hello response from the server does not include serviceId.
+    client mongo_client(uri("mongodb://localhost:27017/"), client_opts);
+    stdx::string_view database_name{"database"};
+    database database = mongo_client[database_name];
+
+    // Mock mongoc_apm_command_started_get_service_id
+    auto apm_command_started_get_service_id = libmongoc::apm_command_started_get_service_id.create_instance();
+
+    bson_oid_t temp = {0};
+    apm_command_started_get_service_id->interpose([&] (const mongoc_apm_command_started_t *event) {
+        (void) event;
+        
+        return &temp;
+    });
+
+    // Reference for ping command: https://docs.mongodb.com/manual/reference/command/ping/
+    auto cmd = make_document (kvp ("ping", 1));
+    database.run_command (cmd.view());
+
+}
+
 TEST_CASE("A default constructed database is false-ish", "[database]") {
     instance::current();
 
