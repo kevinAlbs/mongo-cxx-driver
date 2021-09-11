@@ -499,20 +499,29 @@ TEST_CASE("Database integration tests", "[database]") {
 template <typename EventT>
 struct check_service_id
 {
+    const bool expect_service_id;
+
+    check_service_id(const bool expect_service_id)
+     : expect_service_id(expect_service_id)
+    {}
+
     void operator()(const EventT& event) {
 
-        // We MUST NOT report a service_id() outside of load-balancing mode, but in
-        // load-balancing mode, a value is required:
         INFO("checking for service_id()")
-        CAPTURE(event.command_name(), test_util::is_load_balanced());
+        CAPTURE(event.command_name(), expect_service_id);
         auto service_id = event.service_id();
 
-        // We do NOT expect a service_id when NOT IN load-balanced mode:
-        CHECK_FALSE(service_id);
+        if(expect_service_id)
+         CHECK(service_id);
+        else
+         CHECK_FALSE(service_id);
     }
 };
 
-TEST_CASE("Test serviceId is not included in command monitoring events when not in load-balancing mode") {
+TEST_CASE("Test serviceId is or is not included in command monitoring events, depending on load-balancing mode") {
+
+    // Repeat the test case depending on
+    auto expect_service_id = GENERATE(true, false);
 
     instance::current();
 
@@ -520,43 +529,48 @@ TEST_CASE("Test serviceId is not included in command monitoring events when not 
 
     // Set Application Performance Monitoring options (APM):
     mongocxx::options::apm apm_opts;
-    apm_opts.on_command_started ( check_service_id<mongocxx::events::command_started_event>{} );
-    apm_opts.on_command_succeeded ( check_service_id<mongocxx::events::command_succeeded_event> {} );
-    apm_opts.on_command_failed ( check_service_id<mongocxx::events::command_failed_event> {} );
+    apm_opts.on_command_started ( check_service_id<mongocxx::events::command_started_event>{ expect_service_id } );
+    apm_opts.on_command_succeeded ( check_service_id<mongocxx::events::command_succeeded_event> { expect_service_id } );
+    apm_opts.on_command_failed ( check_service_id<mongocxx::events::command_failed_event> { expect_service_id } );
 
     // Set up mocking for mongoc_apm_command_started_get_service_id:
     auto apm_command_started_get_service_id = libmongoc::apm_command_started_get_service_id.create_instance();
     auto apm_command_succeeded_get_service_id = libmongoc::apm_command_succeeded_get_service_id.create_instance();
     auto apm_command_failed_get_service_id = libmongoc::apm_command_failed_get_service_id.create_instance();
 
-    // We have no actual way of knowing if load-balancing is enabled, so we'll have to satisfy ourselves
-    // with checking for the positive case for now:
-
+    // Helpers:
     struct 
+   	{
+    	    bson_oid_t *operator()(const void *) {
+    	        static bson_oid_t tmp = {};
+    	        return &tmp;
+    	    }
+    	} make_empty_bson_oid_t;
+
+    // A bson_oid_t with data where the service_id should be:
+    struct 
+   	{
+    	    bson_oid_t *operator()(const void *) {
+    	        static bson_oid_t tmp = { 0x0A };
+    	        return &tmp;
+    	    }
+    	} make_service_id_bson_oid_t;
+
+    // Set up mocked functions that DO emit a service_id:
+    if(expect_service_id)
     {
-	bson_oid_t *operator()(const void *) {
-	    static bson_oid_t tmp = {};
-            return &tmp;
-        }
-    } make_empty_bson_oid_t;
+    	apm_command_started_get_service_id->interpose(make_service_id_bson_oid_t);
+    	apm_command_succeeded_get_service_id->interpose(make_service_id_bson_oid_t);
+    	apm_command_failed_get_service_id->interpose(make_service_id_bson_oid_t);
+    }
 
-    apm_command_started_get_service_id->interpose(make_empty_bson_oid_t);
-
-/*
-    apm_command_started_get_service_id->interpose([&] (const mongoc_apm_command_started_t *) {
-	static bson_oid_t tmp = {};
-        return &tmp;
-    });
-*/
-    apm_command_succeeded_get_service_id->interpose([&] (const mongoc_apm_command_succeeded_t *) {
-	static bson_oid_t tmp = {};
-        return &tmp;
-    });
-
-    apm_command_failed_get_service_id->interpose([&] (const mongoc_apm_command_failed_t *) {
-	static bson_oid_t tmp = {};
-        return &tmp;
-    });
+    // Set up mocked functions that DO NOT emit a service_id:
+    if(!expect_service_id)
+    {
+    	apm_command_started_get_service_id->interpose(make_empty_bson_oid_t);
+    	apm_command_succeeded_get_service_id->interpose(make_empty_bson_oid_t);
+    	apm_command_failed_get_service_id->interpose(make_empty_bson_oid_t);
+    }
 
     // Set up our connection:
     client_opts.apm_opts (apm_opts);
