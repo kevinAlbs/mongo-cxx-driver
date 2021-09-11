@@ -249,10 +249,6 @@ bool is_replica_set(const client& client) {
     return static_cast<bool>(reply.view()["setName"]);
 }
 
-bool is_load_balanced(const client& /* client */) {
-    return nullptr != std::getenv("MONGOC_TEST_LOADBALANCED");
-}
-
 std::string get_hosts(const client& client) {
     auto shards = get_shards(client);
     if (shards)
