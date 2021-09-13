@@ -513,10 +513,11 @@ struct check_service_id
 
         auto service_id = event.service_id();
 
+INFO("JFW: expect_service_id == " << expect_service_id << ", service_id == " << (static_cast<bool>(service_id)));
         if(expect_service_id)
-         CHECK(stdx::nullopt != service_id);
+         CHECK(service_id);
         else
-         CHECK(stdx::nullopt == service_id);
+         CHECK_FALSE(service_id);
     }
 };
 
