@@ -593,7 +593,7 @@ INFO("JFW: back from run_command()/ping");
 
     // Attempt to trigger failure:
     cmd = make_document (kvp ("some_sort_of_invalid_command_that_should_never_happen", 1));
-    database.run_command (cmd.view());
+    CHECK_THROWS(database.run_command (cmd.view()));
 INFO("JFW: back from run_command()/fail");
 }
 
