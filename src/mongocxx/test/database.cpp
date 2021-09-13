@@ -543,7 +543,8 @@ INFO("JFW: running test case");
     auto apm_command_succeeded_get_service_id = libmongoc::apm_command_succeeded_get_service_id.create_instance();
     auto apm_command_failed_get_service_id = libmongoc::apm_command_failed_get_service_id.create_instance();
 
-    // Return an empty bason_oid_t:
+/*
+    // Return an empty bason_oid_t (not the same as a nullptr, however):
     struct 
    	{
     	    bson_oid_t *operator()(const void *) {
@@ -551,6 +552,15 @@ INFO("JFW: running test case");
     	        return &tmp;
     	    }
     	} make_empty_bson_oid_t;
+*/
+
+// JFW: FIXME:
+struct 
+    {
+    bson_oid_t *operator()(const void *) {
+    return nullptr;
+    }
+} make_empty_bson_oid_t;
 
     // Return a bson_oid_t with data where the service_id has some value:
     struct 
