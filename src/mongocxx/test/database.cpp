@@ -520,7 +520,9 @@ struct check_service_id
 
 TEST_CASE("Test serviceId is or is not included in command monitoring events, depending on load-balancing mode") {
 
-    // Repeat the test case depending on
+INFO("JFW: running test case");
+
+    // Repeat the test case for a situation in which service_id should and should not be returned:
     auto expect_service_id = GENERATE(true, false);
 
     instance::current();
@@ -538,7 +540,7 @@ TEST_CASE("Test serviceId is or is not included in command monitoring events, de
     auto apm_command_succeeded_get_service_id = libmongoc::apm_command_succeeded_get_service_id.create_instance();
     auto apm_command_failed_get_service_id = libmongoc::apm_command_failed_get_service_id.create_instance();
 
-    // Helpers:
+    // Return an empty bason_oid_t:
     struct 
    	{
     	    bson_oid_t *operator()(const void *) {
@@ -547,11 +549,11 @@ TEST_CASE("Test serviceId is or is not included in command monitoring events, de
     	    }
     	} make_empty_bson_oid_t;
 
-    // A bson_oid_t with data where the service_id should be:
+    // Return a bson_oid_t with data where the service_id has some value:
     struct 
    	{
     	    bson_oid_t *operator()(const void *) {
-    	        static bson_oid_t tmp = { 0x0A };
+    	        static bson_oid_t tmp = { 0x65 };
     	        return &tmp;
     	    }
     	} make_service_id_bson_oid_t;
@@ -580,13 +582,16 @@ TEST_CASE("Test serviceId is or is not included in command monitoring events, de
     stdx::string_view database_name{"database"};
     database database = mongo_client[database_name];
 
+INFO("JFW: about to make_document, expect_service_id: " << expect_service_id);
     // Run a command, triggering start and completion events:
     auto cmd = make_document (kvp ("ping", 1));
     database.run_command (cmd.view());
+INFO("JFW: back from run_command()/ping");
 
     // Attempt to trigger failure:
     cmd = make_document (kvp ("some_sort_of_invalid_command_that_should_never_happen", 1));
     database.run_command (cmd.view());
+INFO("JFW: back from run_command()/fail");
 }
 
 }  // namespace
