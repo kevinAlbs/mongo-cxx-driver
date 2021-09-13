@@ -495,7 +495,8 @@ TEST_CASE("Database integration tests", "[database]") {
 // As C++11 lacks generic lambdas, and "ordinary" templates can't appear at block scope,
 // we'll have to define our helper for the serviceId tests here. This implementation would
 // be more straightforward in newer versions of C++ (C++14 and on allow generic lambdas), 
-// see CXX-2350 (migration to more recent C++ standards):
+// see CXX-2350 (migration to more recent C++ standards); our C++17 optional<> implmentation
+// also has a few inconsistencies with the standard, which appear to vary across platforms:
 template <typename EventT>
 struct check_service_id
 {
@@ -509,12 +510,13 @@ struct check_service_id
 
         INFO("checking for service_id()")
         CAPTURE(event.command_name(), expect_service_id);
+
         auto service_id = event.service_id();
 
         if(expect_service_id)
-         CHECK(service_id);
+         CHECK(stdx::nullopt != service_id);
         else
-         CHECK_FALSE(service_id);
+         CHECK(stdx::nullopt == service_id);
     }
 };
 
