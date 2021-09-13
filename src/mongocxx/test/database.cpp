@@ -576,7 +576,10 @@ struct
     {
     	apm_command_started_get_service_id->interpose(make_service_id_bson_oid_t);
     	apm_command_succeeded_get_service_id->interpose(make_service_id_bson_oid_t);
-    	apm_command_failed_get_service_id->interpose(make_service_id_bson_oid_t);
+
+        // Failed never returns a service_id:
+    	apm_command_failed_get_service_id->interpose(make_empty_bson_oid_t);
+//JFW:    	apm_command_failed_get_service_id->interpose(make_service_id_bson_oid_t);
     }
 
     // Set up mocked functions that DO NOT emit a service_id:
@@ -602,6 +605,7 @@ INFO("JFW: about to make_document, expect_service_id: " << expect_service_id);
 INFO("JFW: back from run_command()/ping");
 
     // Attempt to trigger failure:
+INFO("JFW: about to make a failed command");
     cmd = make_document (kvp ("some_sort_of_invalid_command_that_should_never_happen", 1));
     CHECK_THROWS(database.run_command (cmd.view()));
 INFO("JFW: back from run_command()/fail");
