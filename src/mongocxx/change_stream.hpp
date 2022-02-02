@@ -140,11 +140,17 @@ class MONGOCXX_API change_stream::iterator {
 
     ///
     /// Dereferences the view for the document currently being pointed to.
+    /// The returned document::view is valid until the iterator is incremented.
+    /// The value may be copied to extend its lifetime or preserve the
+    /// current resume token.
     ///
     const bsoncxx::document::view& operator*() const;
 
     ///
     /// Accesses a member of the dereferenced document currently being pointed to.
+    /// The returned document::view is valid until the iterator is incremented.
+    /// The value may be copied to extend its lifetime or preserve the
+    /// current resume token.
     ///
     const bsoncxx::document::view* operator->() const;
 
