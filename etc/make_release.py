@@ -135,6 +135,8 @@ def release(jira_creds_file,
     auth_jira = JIRA(jira_options, oauth=jira_oauth_dict)
 
     github_token = read_github_creds(github_token_file)
+    if not github_token:
+        sys.exit(1)
     auth_gh = Github(github_token)
 
     if not is_valid_remote(remote):
@@ -524,7 +526,8 @@ def read_github_creds(github_token_file):
     Read the GitHub token from the specified file and return it as a string.
     """
 
-    token_re = re.compile('^(?:Token - )?(?P<tok>[0-9a-f]{40}).*$')
+    # See https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/ for a description of GitHub token formats.
+    token_re = re.compile('^(?:Token - )?(?P<tok>[0-9a-zA-Z_]{40}).*$')
     github_token = None
 
     with open(github_token_file, 'rb') as token_stream:
@@ -533,8 +536,8 @@ def read_github_creds(github_token_file):
         if token_match:
             github_token = token_match.group('tok')
         else:
-            click.echo('No Github token found in file "{}"'
-                       .format(github_token_file), err=True)
+            click.echo('Github token found in file "{}" does not match expected form, got: {}'
+                       .format(github_token_file, token_data), err=True)
 
     return github_token
 
