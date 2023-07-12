@@ -29,6 +29,14 @@
 namespace {
 using namespace mongocxx;
 
+TEST_CASE("a pool is created with an invalid connection string", "[pool]") {
+    MOCK_POOL
+    instance::current();
+    std::string uristr = "mongodb+srv://foo.bar.baz";
+    pool pool{mongocxx::uri(uristr)};
+    auto client = pool.try_acquire();
+}
+
 TEST_CASE("A default constructed client is false-ish", "[client]") {
     MOCK_CLIENT
 

@@ -115,7 +115,7 @@ class MONGOCXX_API pool {
     MONGOCXX_PRIVATE void _release(client* client);
 
     class MONGOCXX_PRIVATE impl;
-    const std::unique_ptr<impl> _impl;
+    std::unique_ptr<impl> _impl;
 };
 
 MONGOCXX_INLINE_NAMESPACE_END

@@ -42,8 +42,15 @@ void pool::_release(client* client) {
 
 pool::~pool() = default;
 
-pool::pool(const uri& uri, const options::pool& options)
-    : _impl{stdx::make_unique<impl>(libmongoc::client_pool_new(uri._impl->uri_t))} {
+pool::pool(const uri& uri, const options::pool& options) {
+    bson_error_t error;
+    _impl =
+        stdx::make_unique<impl>(libmongoc::client_pool_new_with_error(uri._impl->uri_t, &error));
+    if (!_impl) {
+        // If constructing a client pool failed, throw an exception from the bson_error_t.
+        throw_exception<operation_exception>(error);
+    }
+
 #if defined(MONGOCXX_ENABLE_SSL) && defined(MONGOC_ENABLE_SSL)
     if (options.client_opts().tls_opts()) {
         if (!uri.tls())
