@@ -1129,6 +1129,39 @@ tasks:
         - func: "run_kms_servers"
         - func: "test"
 
+    - name: test-search-index-helpers
+      commands:
+      # TODO: fetch C++ driver source.
+      - func: "clone_drivers-evergreen-tools"
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |
+            # For initial testing, enable xtrace.
+            set -o xtrace
+            echo "DRIVERS_TOOLS expansion is defined as: ${DRIVERS_TOOLS}"
+            echo "DRIVERS_ATLAS_PUBLIC_API_KEY expansion is defined as: ${DRIVERS_ATLAS_PUBLIC_API_KEY}"
+            # TODO: export necessary variables for setup-atlas-cluster.sh and run
+            # ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        # Expected to set MONGODB_URI expansion.
+        params:
+          file: atlas-expansion.yml
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |
+            echo "In task: test-search-index-helpers. MONGODB_URI expansion is ${MONGODB_URI}"
+            # TODO: Run a script to compile.
+            # TODO: pass environment variable for URI and run only the C++ tests that run the search index prose tests.
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+       # TODO: once this is working, use a task group for the setup and teardown scripts. This ensures that the teardown task runs on test failure.
+
 #######################################
 #           MongoDB Version Matrix    #
 #######################################
@@ -1610,6 +1643,7 @@ buildvariants:
       tasks:
         - name: clang-tidy
         - name: compile_without_tests
+        - name: test-search-index-helpers
 
     - name: ubuntu1404-debug-gcc
       display_name: "Ubuntu 14.04 Debug (g++ 4.8)"
