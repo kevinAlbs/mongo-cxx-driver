@@ -309,6 +309,11 @@ functions:
             if [ ! -d "drivers-evergreen-tools" ]; then
                 git clone git@github.com:mongodb-labs/drivers-evergreen-tools.git --depth=1
             fi
+            echo "DRIVERS_TOOLS: $(pwd)/drivers-evergreen-tools" > det-expansion.yml
+      # Set DRIVERS_TOOLS expansion.
+      - command: expansions.update
+        params:
+          file: det-expansion.yml
 
     "run_kms_servers":
       - command: shell.exec
