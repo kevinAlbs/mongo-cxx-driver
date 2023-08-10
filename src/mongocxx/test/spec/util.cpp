@@ -856,6 +856,7 @@ void run_transactions_tests_in_file(const std::string& test_path) {
     for (auto&& test : tests) {
         const auto description = string::to_string(test["description"].get_string().value);
 
+        INFO("Test description: " << description);
         SECTION(description) {
             client setup_client{get_uri(test.get_document().value),
                                 test_util::add_test_server_api()};
