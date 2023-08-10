@@ -621,6 +621,9 @@ void parse_session_opts(document::view session_opts, options::client_session* ou
             txn_opts.read_preference(*rp);
         }
     }
+    if (session_opts["causalConsistency"]) {
+        out->causal_consistency(session_opts["causalConsistency"].get_bool());
+    }
 
     out->default_transaction_opts(txn_opts);
 }
