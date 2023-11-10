@@ -89,8 +89,6 @@ benchmark_runner::benchmark_runner(std::set<benchmark_type> types) : _types{type
 }
 
 void benchmark_runner::run_microbenches() {
-    mongocxx::instance instance{};
-
     for (std::unique_ptr<microbench>& bench : _microbenches) {
         std::cout << "Starting " << bench->get_name() << "..." << std::endl;
 

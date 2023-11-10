@@ -15,10 +15,12 @@
 #include <iostream>
 
 #include "benchmark_runner.hpp"
+#include <mongocxx/instance.hpp>
 
 using namespace benchmark;
 
 int main(int argc, char* argv[]) {
+    mongocxx::instance instance{};
     std::set<benchmark_type> types;
 
     if (argc > 1) {
