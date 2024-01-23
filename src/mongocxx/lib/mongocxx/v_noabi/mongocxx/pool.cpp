@@ -146,7 +146,58 @@ stdx::optional<pool::entry> pool::try_acquire() {
         entry::unique_client(new client(cli), [this](client* client) { _release(client); }));
 }
 
-void pool::warmup(std::size_t num_clients) {}
+// `server_descriptions` destroys a `mongoc_server_description_t**` on destruction.
+struct server_descriptions_deleter {
+    server_descriptions_deleter(mongoc_server_description_t** descriptions, std::size_t n)
+        : descriptions(descriptions), n(n) {}
+    ~server_descriptions_deleter() {
+        libmongoc::server_descriptions_destroy_all(descriptions, n);
+    }
+    mongoc_server_description_t** descriptions;
+    std::size_t n;
+};
+
+void pool::warmup(std::size_t num_clients) {
+    using bsoncxx::builder::basic::kvp;
+    using bsoncxx::builder::basic::make_document;
+
+    auto ping_cmd = make_document(kvp("ping", 1));
+
+    // Get the set of server IDs.
+    std::vector<uint32_t> server_ids;
+    {
+        // Send a "ping" on one client to force initial server discovery.
+        auto client = this->acquire();
+        client->database("admin").run_command(ping_cmd.view());
+        size_t num_servers = 0;
+        auto descriptions =
+            mongoc_client_get_server_descriptions(client->_get_impl().client_t, &num_servers);
+        auto sdd = server_descriptions_deleter(descriptions, num_servers);
+        for (std::size_t i = 0; i < num_servers; i++) {
+            server_ids.push_back(mongoc_server_description_id(descriptions[i]));
+        }
+    }
+
+    std::vector<stdx::optional<pool::entry>> clients;
+    for (std::size_t i = 0; i < num_clients; i++) {
+        // Use `try_acquire`. If `num_clients` exceeds the max pool size, nullopt is returned.
+        auto maybe_client = this->try_acquire();
+        if (!maybe_client) {
+            // Exceeded max pool size.
+            break;
+        }
+
+        // Send a "ping" command to do initial server discovery.
+        auto& client = *maybe_client;
+
+        for (auto&& server_id : server_ids) {
+            client->database("admin").run_command(ping_cmd.view(), server_id);
+        }
+
+        // Store `maybe_client` to keep the client checked out of the pool.
+        clients.push_back(std::move(maybe_client));
+    }
+}
 
 }  // namespace v_noabi
 }  // namespace mongocxx
