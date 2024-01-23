@@ -112,6 +112,8 @@ class pool {
     ///
     stdx::optional<entry> try_acquire();
 
+    void warmup(std::size_t num_clients);
+
    private:
     friend ::mongocxx::v_noabi::options::auto_encryption;
 

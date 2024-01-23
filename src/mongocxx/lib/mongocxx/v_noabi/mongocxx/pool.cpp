@@ -14,6 +14,8 @@
 
 #include <utility>
 
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/builder/basic/kvp.hpp>
 #include <bsoncxx/stdx/make_unique.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/exception/error_code.hpp>
@@ -143,6 +145,8 @@ stdx::optional<pool::entry> pool::try_acquire() {
     return entry(
         entry::unique_client(new client(cli), [this](client* client) { _release(client); }));
 }
+
+void pool::warmup(std::size_t num_clients) {}
 
 }  // namespace v_noabi
 }  // namespace mongocxx
