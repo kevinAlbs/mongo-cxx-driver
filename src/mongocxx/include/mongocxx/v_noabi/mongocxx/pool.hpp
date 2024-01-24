@@ -112,6 +112,9 @@ class pool {
     ///
     stdx::optional<entry> try_acquire();
 
+    ///
+    /// Eagerly connect ``num_clients`` clients in the pool to the connected MongoDB servers.
+    ///
     void warmup(std::size_t num_clients);
 
    private:
