@@ -180,7 +180,12 @@ void add_auto_encryption_opts(document::view test, options::client* client_opts)
         char* bypass_spawn = std::getenv("ENCRYPTION_TESTS_BYPASS_SPAWN");
         char* mongocryptd_path = std::getenv("MONGOCRYPTD_PATH");
 
-        if (bypass_spawn || mongocryptd_path) {
+        const auto shared_lib_path = std::getenv("CRYPT_SHARED_LIB_PATH");
+        if (shared_lib_path) {
+            auto_encrypt_opts.extra_options(bsoncxx::builder::basic::make_document(
+                bsoncxx::builder::basic::kvp("cryptSharedLibPath", shared_lib_path),
+                bsoncxx::builder::basic::kvp("cryptSharedLibRequired", true)));
+        } else if (bypass_spawn || mongocryptd_path) {
             auto cmd = bsoncxx::builder::basic::document{};
 
             if (bypass_spawn && strcmp(bypass_spawn, "TRUE") == 0) {
