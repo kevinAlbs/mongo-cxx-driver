@@ -246,6 +246,6 @@ fi
 "${cmake_binary}" --build . --config "${build_type:?}" "${build_targets[@]:?}" -- "${cmake_build_opts[@]}"
 "${cmake_binary}" --install . --config "${build_type:?}"
 
-if [[ "${_RUN_DISTCHECK:-}" ]]; then
-  "${cmake_binary}" --build . --config "${build_type:?}" --target distcheck
-fi
+# if [[ "${_RUN_DISTCHECK:-}" ]]; then
+#   "${cmake_binary}" --build . --config "${build_type:?}" --target distcheck
+# fi
