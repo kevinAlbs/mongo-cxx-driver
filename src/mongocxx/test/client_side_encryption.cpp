@@ -3560,4 +3560,119 @@ TEST_CASE("16. Rewrap. Case 2: RewrapManyDataKeyOpts.provider is not optional", 
         Catch::Matchers::ContainsSubstring("expected 'provider' to be set to identify type of 'master_key'"));
 }
 
+TEST_CASE("25. Test $lookup.", "[client_side_encryption]") {
+    instance::current();
+
+    // Check test constraints.
+    {
+        mongocxx::client client{mongocxx::uri{}, test_util::add_test_server_api()};
+        if (!test_util::newer_than(client, "7.0")) {
+            SKIP("MongoDB server 7.0 or newer required");
+        }
+
+        if (test_util::get_topology(client) == "single") {
+            SKIP("must not run against a standalone server");
+        }
+    }
+
+    CLIENT_SIDE_ENCRYPTION_ENABLED_OR_SKIP();
+
+    auto create_encrypted_client = [] {
+        auto auto_encryption_opts = options::auto_encryption();
+        auto_encryption_opts.key_vault_namespace({"db", "keyvault"});
+        auto_encryption_opts.kms_providers(_make_kms_doc(false /* only configure 'local' */));
+        auto client_opts = options::client();
+        client_opts.auto_encryption_opts(auto_encryption_opts);
+        return mongocxx::client(uri(), test_util::add_test_server_api().auto_encryption_opts(auto_encryption_opts));
+    };
+
+    // Setup
+    {
+        auto encrypted_client = create_encrypted_client();
+        encrypted_client["db"]["keyvault"].drop();
+
+        // Insert key-doc.json into `db.keyvault` with majority write concern.
+        {
+            auto key_doc = _doc_from_file("/lookup/key-doc.json");
+            auto wc_majority = write_concern();
+            wc_majority.acknowledge_level(write_concern::level::k_majority);
+            encrypted_client["db"]["keyvault"].insert_one(key_doc.view(), options::insert().write_concern(wc_majority));
+        }
+
+        // Create collections.
+        {
+            encrypted_client["db"].create_collection(
+                "csfle",
+                make_document(
+                    kvp("validator", make_document(kvp("$jsonSchema", _doc_from_file("/lookup/schema-csfle.json"))))));
+            encrypted_client["db"].create_collection(
+                "csfle2",
+                make_document(
+                    kvp("validator", make_document(kvp("$jsonSchema", _doc_from_file("/lookup/schema-csfle2.json"))))));
+            encrypted_client["db"].create_collection(
+                "qe", make_document(kvp("encryptedFields", _doc_from_file("/lookup/schema-qe.json"))));
+            encrypted_client["db"].create_collection(
+                "qe2", make_document(kvp("encryptedFields", _doc_from_file("/lookup/schema-qe2.json"))));
+            encrypted_client["db"].create_collection("no_schema");
+            encrypted_client["db"].create_collection("no_schema2");
+        }
+
+        // Insert documents.
+        {
+            encrypted_client["db"]["csfle"].insert_one(make_document(kvp("csfle", "csfle")));
+            encrypted_client["db"]["csfle2"].insert_one(make_document(kvp("csfle2", "csfle2")));
+            encrypted_client["db"]["qe"].insert_one(make_document(kvp("qe", "qe")));
+            encrypted_client["db"]["qe2"].insert_one(make_document(kvp("qe2", "qe2")));
+            encrypted_client["db"]["no_schema"].insert_one(make_document(kvp("no_schema", "no_schema")));
+            encrypted_client["db"]["no_schema2"].insert_one(make_document(kvp("no_schema2", "no_schema2")));
+        }
+    }
+
+    auto get_results = [](cursor&& cursor) {
+        std::vector<bsoncxx::document::value> results;
+        std::transform(cursor.begin(), cursor.end(), std::back_inserter(results), [](bsoncxx::document::view v) {
+            return bsoncxx::document::value{v};
+        });
+        return results;
+    };
+
+    SECTION("Case 1: db.csfle joins db.no_schema") {
+        // Check test constraints.
+        {
+            mongocxx::client client{mongocxx::uri{}, test_util::add_test_server_api()};
+            if (!test_util::newer_than(client, "8.1")) {
+                SKIP("MongoDB server 8.1 or newer required");
+            }
+        }
+
+        auto encrypted_client = create_encrypted_client();
+        auto pipeline = mongocxx::pipeline();
+        pipeline.append_stage(bsoncxx::from_json(R"(
+            {"$match" : {"csfle" : "csfle"}}
+        )"));
+        pipeline.append_stage(bsoncxx::from_json(R"(
+            {
+                "$lookup" : {
+                    "from" : "no_schema",
+                    "as" : "matched",
+                    "pipeline" : [ {"$match" : {"no_schema" : "no_schema"}}, {"$project" : {"_id" : 0}} ]
+                }
+            }
+        )"));
+        pipeline.append_stage(bsoncxx::from_json(R"(
+            {"$project" : {"_id" : 0}}
+        )"));
+
+        auto cursor = encrypted_client["db"]["csfle"].aggregate(pipeline);
+        auto results = get_results(std::move(cursor));
+        CHECK(results.size() == 1);
+        auto expected = bsoncxx::from_json(R"(
+            {"csfle" : "csfle", "matched" : [ {"no_schema" : "no_schema"} ]}
+        )");
+        CHECK(results[0] == expected);
+    }
+
+    CHECK(false); // Not implemented yet.
+}
+
 } // namespace
