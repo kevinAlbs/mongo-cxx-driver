@@ -83,6 +83,10 @@ options::client add_test_server_api(options::client opts = {});
 // Throws mongocxx::operation_exception if the operation fails, or the server reply is malformed.
 //
 std::int32_t get_max_wire_version();
+//
+// Overload accepting any client.
+//
+std::int32_t get_max_wire_version(mongocxx::client& client);
 
 ///
 /// Determines the server version number by running "serverStatus" with the default client.

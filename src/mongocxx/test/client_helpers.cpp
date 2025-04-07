@@ -54,13 +54,17 @@ using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
 namespace {
-// These frequently used network calls are cached to avoid bottlenecks during tests.
+// These frequently used network calls are cached when using a default client to avoid bottlenecks during tests.
 document::value get_is_master() {
     static auto reply = []() {
         auto client = mongocxx::client{mongocxx::uri{}, test_util::add_test_server_api()};
         return client["admin"].run_command(make_document(kvp("isMaster", 1)));
     }();
     return reply;
+}
+// Non-caching overload:
+document::value get_is_master(mongocxx::client& client) {
+    return client["admin"].run_command(make_document(kvp("isMaster", 1)));
 }
 
 document::value get_server_status() {
@@ -259,6 +263,20 @@ options::client add_test_server_api(options::client opts) {
 
 std::int32_t get_max_wire_version() {
     auto reply = get_is_master();
+    auto max_wire_version = reply.view()["maxWireVersion"];
+    if (!max_wire_version) {
+        // If wire version is not available (i.e. server version too old), it is assumed to be
+        // zero.
+        return 0;
+    }
+    if (max_wire_version.type() != bsoncxx::type::k_int32) {
+        throw operation_exception{error_code::k_server_response_malformed};
+    }
+    return max_wire_version.get_int32().value;
+}
+
+std::int32_t get_max_wire_version(mongocxx::client& client) {
+    auto reply = get_is_master(client);
     auto max_wire_version = reply.view()["maxWireVersion"];
     if (!max_wire_version) {
         // If wire version is not available (i.e. server version too old), it is assumed to be
