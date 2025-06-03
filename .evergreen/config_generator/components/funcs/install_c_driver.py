@@ -10,6 +10,7 @@ from typing import Mapping
 # If updating mongoc_version_minimum, also update:
 # - BSON_REQUIRED_VERSION and MONGOC_REQUIRED_VERSION in CMakeLists.txt
 # - the version of pkg:github/mongodb/mongo-c-driver in etc/purls.txt
+#   - regenerate the "SBOM Lite" and "Augmented SBOM" files. See releasing.md for instructions.
 # - the default value of --c-driver-build-ref in etc/make_release.py
 # Only MONGOC_DOWNLOAD_VERSION needs to be updated when pinning to an unreleased commit.
 # If pinning to an unreleased commit, create a "Blocked" JIRA ticket with
