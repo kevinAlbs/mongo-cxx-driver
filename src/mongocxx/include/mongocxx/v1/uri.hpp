@@ -393,9 +393,12 @@ class uri {
 
     class internal;
 
+    class impl_type;
+
    private:
-    // MSVC may incorrectly select this ctor given a `char const*` argument without `/Zc:strictStrings`.
-    explicit uri(void* impl);
+    // Use `impl_type` rather than `void*`.
+    // Avoids MSVC incorrectly selecting a `void*` ctor given a `char const*` argument without `/Zc:strictStrings`.
+    explicit uri(impl_type impl);
 };
 
 BSONCXX_PRIVATE_INLINE_CXX17 constexpr char const* uri::k_default_uri;

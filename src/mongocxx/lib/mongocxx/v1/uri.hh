@@ -24,6 +24,11 @@
 namespace mongocxx {
 namespace v1 {
 
+class uri::impl_type {
+   public:
+    void* data;
+};
+
 class uri::internal {
    public:
     static uri make(mongoc_uri_t* uri);
