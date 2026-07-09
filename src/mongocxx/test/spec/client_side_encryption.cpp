@@ -162,28 +162,52 @@ void add_auto_encryption_opts(document::view test, options::client* client_opts)
             auto_encrypt_opts.tls_opts({tls_opts.extract()});
         }
 
-        char* bypass_spawn = std::getenv("ENCRYPTION_TESTS_BYPASS_SPAWN");
-        char* mongocryptd_path = std::getenv("MONGOCRYPTD_PATH");
-
-        auto const shared_lib_path = std::getenv("CRYPT_SHARED_LIB_PATH");
-        if (shared_lib_path) {
+        // Apply extra options from environment if not set in test.
+        {
             using bsoncxx::builder::basic::kvp;
-            using bsoncxx::builder::basic::make_document;
 
-            auto_encrypt_opts.extra_options(
-                make_document(kvp("cryptSharedLibPath", shared_lib_path), kvp("cryptSharedLibRequired", true)));
-        } else if (bypass_spawn || mongocryptd_path) {
-            auto cmd = bsoncxx::builder::basic::document{};
+            bsoncxx::stdx::optional<bsoncxx::document::view> extra_options_from_test;
+            if (test_encrypt_opts["extraOptions"]) {
+                extra_options_from_test = test_encrypt_opts["extraOptions"].get_document().value;
+            }
+
+            auto extra_options = bsoncxx::builder::basic::document{};
+
+            auto const mongocryptd_path = std::getenv("MONGOCRYPTD_PATH");
+            auto const bypass_spawn = std::getenv("ENCRYPTION_TESTS_BYPASS_SPAWN");
+            auto const shared_lib_path = std::getenv("CRYPT_SHARED_LIB_PATH");
+
+            auto has_extra_option_from_test = [&](std::string const& key) {
+                return extra_options_from_test && (*extra_options_from_test)[key];
+            };
+
+            if (shared_lib_path) {
+                if (!has_extra_option_from_test("cryptSharedLibPath")) {
+                    extra_options.append(kvp("cryptSharedLibPath", shared_lib_path));
+                }
+                if (!has_extra_option_from_test("cryptSharedLibRequired")) {
+                    extra_options.append(kvp("cryptSharedLibRequired", true));
+                }
+            }
 
             if (bypass_spawn && strcmp(bypass_spawn, "TRUE") == 0) {
-                cmd.append(bsoncxx::builder::basic::kvp("mongocryptdBypassSpawn", true));
+                if (!has_extra_option_from_test("mongocryptdBypassSpawn")) {
+                    extra_options.append(bsoncxx::builder::basic::kvp("mongocryptdBypassSpawn", true));
+                }
             }
 
             if (mongocryptd_path) {
-                cmd.append(bsoncxx::builder::basic::kvp("mongocryptdSpawnPath", mongocryptd_path));
+                if (!has_extra_option_from_test("mongocryptdSpawnPath")) {
+                    extra_options.append(bsoncxx::builder::basic::kvp("mongocryptdSpawnPath", mongocryptd_path));
+                }
             }
 
-            auto_encrypt_opts.extra_options({cmd.extract()});
+            // Add extra options (if any) from test.
+            if (extra_options_from_test) {
+                extra_options.append(bsoncxx::builder::concatenate(extra_options_from_test.value()));
+            }
+
+            auto_encrypt_opts.extra_options(extra_options.extract());
         }
 
         client_opts->auto_encryption_opts(std::move(auto_encrypt_opts));
