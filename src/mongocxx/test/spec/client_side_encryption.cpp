@@ -14,9 +14,15 @@
 
 #include <mongocxx/test/v_noabi/client_helpers.hh>
 
+#include <cstdlib> // getenv
+#include <cstring> // strcmp
 #include <fstream>
 
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/builder/basic/kvp.hpp>
+#include <bsoncxx/builder/concatenate.hpp>
 #include <bsoncxx/document/view.hpp>
+#include <bsoncxx/stdx/optional.hpp>
 #include <bsoncxx/string/to_string.hpp>
 
 #include <mongocxx/client.hpp>
