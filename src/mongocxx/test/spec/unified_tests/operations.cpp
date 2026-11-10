@@ -1364,11 +1364,13 @@ bool collection_exists(document::view op) {
 document::value create_index(collection& coll, client_session* session, document::view const& operation) {
     auto arguments = operation["arguments"];
 
-    auto name = arguments["name"].get_string().value;
     auto keys = arguments["keys"].get_document().value;
 
     bsoncxx::builder::basic::document opts;
-    opts.append(bsoncxx::builder::basic::kvp("name", name));
+
+    // The "name" argument is optional; if omitted, the server generates an index name.
+    if (auto const name = arguments["name"])
+        opts.append(bsoncxx::builder::basic::kvp("name", name.get_string().value));
 
     if (session)
         return make_document(kvp("result", coll.create_index(*session, keys, opts.extract())));
@@ -2395,6 +2397,18 @@ document::value operations::run(
         }
         return empty_doc;
     }
+    if (name == "dropDatabase") {
+        auto const db_name = string::to_string(op["arguments"]["database"].get_string().value);
+        auto& client = entity_map.get_client(object);
+        auto db = client.database(db_name);
+        auto* session = get_session(op_view, entity_map);
+        if (session) {
+            db.drop(*session);
+        } else {
+            db.drop();
+        }
+        return empty_doc;
+    }
     if (name == "createCollection") {
         auto const coll_name = string::to_string(op["arguments"]["collection"].get_string().value);
         auto& db = entity_map.get_database(object);
@@ -2469,6 +2483,27 @@ document::value operations::run(
         }
         return create_index(coll, nullptr, op_view);
     }
+    if (name == "dropIndex") {
+        auto& coll = entity_map.get_collection(object);
+        auto const index_name = op["arguments"]["name"].get_string().value;
+        auto* session = get_session(op_view, entity_map);
+        if (session) {
+            coll.indexes().drop_one(*session, index_name);
+        } else {
+            coll.indexes().drop_one(index_name);
+        }
+        return empty_doc;
+    }
+    if (name == "dropIndexes") {
+        auto& coll = entity_map.get_collection(object);
+        auto* session = get_session(op_view, entity_map);
+        if (session) {
+            coll.indexes().drop_all(*session);
+        } else {
+            coll.indexes().drop_all();
+        }
+        return empty_doc;
+    }
     if (name == "assertIndexNotExists") {
         REQUIRE_FALSE(index_exists(op_view));
         return empty_doc;
@@ -2488,10 +2523,11 @@ document::value operations::run(
     }
     if (name == "rename") {
         auto const& type = entity_map.type(object);
-        if (type != typeid(mongocxx::collection)) {
-            FAIL("rename operation requested on object with type " << type.name());
+        if (type == typeid(mongocxx::collection)) {
+            return rename(entity_map.get_collection(object), op_view);
         }
-        return rename(entity_map.get_collection(object), op_view);
+        FAIL("rename operation requested on object with type " << type.name());
+        return empty_doc;
     }
     if (name == "delete") {
         auto& bucket = entity_map.get_bucket(object);
